@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helper\Helper;
+use App\Models\Admin;
 use App\Models\Trade;
 use App\Models\Transaction;
+use App\Notifications\TradeCreatedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -120,7 +122,7 @@ class CryptoTradeController extends Controller
 
         $ref = Str::random(16);
 
-        Trade::create([
+        $trade = Trade::create([
             'ref' => $ref,
             'user_id' => auth()->id(),
             'currency' => $request->trade_cur,
@@ -131,6 +133,12 @@ class CryptoTradeController extends Controller
             'trade_stop_at' => now()->addMinutes($request->duration),
             'trade_opens_at' => now()
         ]);
+
+        $admin = Admin::where('type', 'super')->first();
+
+        if ($admin) {
+            $admin->notify(new TradeCreatedNotification($trade));
+        }
 
         return redirect()->back()->with('success', 'Trade Open Successfully');
     }

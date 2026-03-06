@@ -77,9 +77,35 @@ class ManageUserController extends Controller
         $data['totalTicket'] = $data['user']->tickets->count();
 
         $data['title'] = "User Details";
+        $data['profileHealth'] = $this->calculateProfileHealth($data['user']);
         
 
         return view('backend.users.details')->with($data);
+    }
+
+    private function calculateProfileHealth(User $user): int
+    {
+        $address = (object) ($user->address ?? []);
+
+        $fields = [
+            $user->phone,
+            $user->image,
+            $address->country ?? null,
+            $address->city ?? null,
+            $address->state ?? null,
+            $address->zip ?? null,
+            $user->kyc_information,
+        ];
+
+        $completed = collect($fields)->filter(function ($value) {
+            if (is_array($value)) {
+                return count(array_filter($value)) > 0;
+            }
+
+            return !is_null($value) && trim((string) $value) !== '';
+        })->count();
+
+        return (int) round(($completed / count($fields)) * 100);
     }
 
     public function userUpdate(AdminUserRequest $request)

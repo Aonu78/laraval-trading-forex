@@ -176,6 +176,17 @@
                     <h2 class="mb-0 mt-1 sp_d_user_balance"> {{ Config::formatter($user->balance)}}</h2>
                 </div>
 
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div>{{ __('Profile Health') }}</div>
+                        <strong>{{ $profileHealth }}%</strong>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ $profileHealth }}%"
+                            aria-valuenow="{{ $profileHealth }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+
                 <div class="sp_balance_btns mt-4">
                     <button type="button" id="addBtn" class="btn btn-sm py-2 btn-success">{{ __('Add Balance') }}</button>
                     <button type="button" id="subBtn" class="btn btn-sm py-2 btn-danger">{{ __('Subtract Balance') }}</button>
