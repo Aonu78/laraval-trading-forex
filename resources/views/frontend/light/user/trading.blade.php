@@ -301,6 +301,9 @@
 
 @push('style')
     <style>
+        .sp_card_body {
+    background: #1a1a1a;
+}
         #linechart .apexcharts-tooltip {
             background-color: #220700 !important;
             border: 1px solid rgba(255, 255, 255, 0.15)
