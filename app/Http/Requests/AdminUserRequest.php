@@ -28,7 +28,8 @@ class AdminUserRequest extends FormRequest
         $user = User::find(request()->user);
 
         return [
-            'phone' => 'unique:users,phone,' . $user->id
+            'phone' => 'unique:users,phone,' . $user->id,
+            'trade_win_rate' => 'required|integer|between:0,100'
         ];
     }
 }

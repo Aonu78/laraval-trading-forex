@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Helpers\Helper\Helper;
 use App\Models\Trade;
 use App\Models\Transaction;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -92,6 +91,7 @@ class CryptoTradeController extends Controller
         $request->validate([
             "trade_cur" => "required",
             "trade_price" => "required",
+            "trade_amount" => "required|numeric|gt:0",
             "type" => "required|in:buy,sell",
             "duration" => "required|gt:0"
         ]);
@@ -109,8 +109,12 @@ class CryptoTradeController extends Controller
 
 
 
-        if ($user->balance < Helper::config()->min_trade_balance) {
-            return redirect()->back()->with('error', 'You need minimum of ' . Helper::formatter(Helper::config()->min_trade_balance) . ' To Trade');
+        if ($request->trade_amount < Helper::config()->min_trade_balance) {
+            return redirect()->back()->with('error', 'Minimum trade amount is ' . Helper::formatter(Helper::config()->min_trade_balance));
+        }
+
+        if ($user->balance < $request->trade_amount) {
+            return redirect()->back()->with('error', 'Insufficient balance for this trade amount');
         }
 
 
@@ -121,6 +125,7 @@ class CryptoTradeController extends Controller
             'user_id' => auth()->id(),
             'currency' => $request->trade_cur,
             'current_price' => $request->trade_price,
+            'trade_amount' => $request->trade_amount,
             'trade_type' => $request->type,
             'duration' => $request->duration,
             'trade_stop_at' => now()->addMinutes($request->duration),
@@ -132,137 +137,148 @@ class CryptoTradeController extends Controller
 
     public function tradeClose()
     {
-        $config = Helper::config();
-
         $trades = Trade::where('user_id', auth()->id())->where('status', 0)->get();
-
-
-
-        foreach ($trades as  $trade) {
-
-            if ($trade->trade_stop_at->lte(now())) {
-
-                $data = json_decode(file_get_contents("https://min-api.cryptocompare.com/data/price?fsym={$trade->currency}&tsyms=USD&api_key=" . $config->crypto_api), true);
-
-                $currentPrice = reset($data);
-
-                if ($currentPrice > $trade->current_price) {
-
-                    // calculations
-                    $amount = $currentPrice - $trade->current_price;
-                    $charge = ($config->trade_charge / 100) * $amount;
-                    $userAmount = $amount - $charge;
-                    $type = '+';
-
-
-                    // Trading Part 
-                    $trade->profit_type = $type;
-                    $trade->profit_amount = $amount;
-                    $trade->charge = $charge;
-                    $trade->status = 1;
-
-
-                    // User Part
-                    $trade->user->balance += $userAmount;
-                    $trade->user->save();
-                } else {
-
-                    // calculations
-                    $amount = $trade->current_price - $currentPrice;
-                    $charge = 0;
-                    $userAmount = $amount;
-                    $type = '-';
-
-                    // Trading Part 
-                    $trade->profit_type = $type;
-                    $trade->loss_amount = $amount;
-                    $trade->charge = 0;
-                    $trade->status = 1;
-
-                    // User Part
-                    $trade->user->balance -= $userAmount;
-                    $trade->user->save();
-                }
-
-                $trade->save();
-
-                Transaction::create([
-                    'trx' => $trade->ref,
-                    'amount' => $amount,
-                    'details' => 'Trade Return',
-                    'charge' => $charge,
-                    'type' => $type,
-                    'user_id' => $trade->user->id
-                ]);
-            }
-        }
+        $this->settleTrades($trades);
     }
 
 
     public function tradingInterest()
     {
+        $trades = Trade::where('status', 0)->get();
+        $this->settleTrades($trades);
+    }
 
+    private function settleTrades($trades): void
+    {
         $config = Helper::config();
 
-        $trades = Trade::where('status', 0)->get();
-
-        foreach ($trades as  $trade) {
-
-            if ($trade->trade_stop_at->lte(now())) {
-
-                $data = json_decode(file_get_contents("https://min-api.cryptocompare.com/data/price?fsym={$trade->currency}&tsyms=USD&api_key=" . $config->crypto_api), true);
-
-                $currentPrice = reset($data);
-
-                if ($currentPrice > $trade->current_price) {
-
-                    // calculations
-                    $amount = $currentPrice - $trade->current_price;
-                    $charge = ($config->trade_charge / 100) * $amount;
-                    $userAmount = $amount - $charge;
-                    $type = '+';
-
-
-                    // Trading Part 
-                    $trade->profit_type = $type;
-                    $trade->profit_amount = $amount;
-                    $trade->charge = $charge;
-                    $trade->status = 1;
-
-
-                    // User Part
-                    $trade->user->balance += $userAmount;
-                    $trade->user->save();
-                } else {
-
-                    // calculations
-                    $amount = $trade->current_price - $currentPrice;
-                    $charge = 0;
-                    $userAmount = $amount;
-                    $type = '-';
-
-                    // Trading Part 
-                    $trade->profit_type = $type;
-                    $trade->loss_amount = $amount;
-                    $trade->charge = 0;
-                    $trade->status = 1;
-
-                    // User Part
-                    $trade->user->balance -= $userAmount;
-                    $trade->user->save();
-                }
-
-                $trade->save();
-
-                Transaction::create([
-                    'trx' => $trade->ref,
-                    'amount' => $amount,
-                    'details' => 'Trade Return',
-                    'charge' => $charge,
-                    'type' => $type,
-                    'user_id' => $trade->user->id
-                ]);
+        foreach ($trades as $trade) {
+            if (! $trade->trade_stop_at->lte(now())) {
+                continue;
             }
+
+            $currentPrice = $this->fetchCurrentPrice($trade->currency, $config->crypto_api);
+
+            if ($currentPrice === null) {
+                continue;
+            }
+
+            $amount = $this->calculateTradeAmount($trade, $currentPrice);
+            $marketResult = $this->determineMarketResult($trade->trade_type, (float) $trade->current_price, $currentPrice);
+            $finalResult = $this->applyBiasResult($marketResult, (int) ($trade->user->trade_win_rate ?? 50));
+
+            if ($finalResult === null) {
+                $this->closeNeutralTrade($trade);
+                continue;
+            }
+
+            if ($finalResult) {
+                $charge = ($config->trade_charge / 100) * $amount;
+                $userAmount = $amount - $charge;
+                $type = '+';
+
+                $trade->profit_type = $type;
+                $trade->profit_amount = $amount;
+                $trade->loss_amount = 0;
+                $trade->charge = $charge;
+                $trade->status = 1;
+
+                $trade->user->balance += $userAmount;
+                $trade->user->save();
+            } else {
+                $charge = 0;
+                $type = '-';
+
+                $trade->profit_type = $type;
+                $trade->profit_amount = 0;
+                $trade->loss_amount = $amount;
+                $trade->charge = 0;
+                $trade->status = 1;
+
+                $trade->user->balance -= $amount;
+                $trade->user->save();
+            }
+
+            $trade->save();
+
+            Transaction::create([
+                'trx' => $trade->ref,
+                'amount' => $amount,
+                'details' => 'Trade Return',
+                'charge' => $charge,
+                'type' => $type,
+                'user_id' => $trade->user->id
+            ]);
         }
+    }
+
+    private function closeNeutralTrade(Trade $trade): void
+    {
+        $trade->profit_type = '=';
+        $trade->profit_amount = 0;
+        $trade->loss_amount = 0;
+        $trade->charge = 0;
+        $trade->status = 1;
+        $trade->save();
+
+        Transaction::create([
+            'trx' => $trade->ref,
+            'amount' => 0,
+            'details' => 'Trade Return',
+            'charge' => 0,
+            'type' => '+',
+            'user_id' => $trade->user->id
+        ]);
+    }
+
+    private function fetchCurrentPrice(string $currency, string $apiKey): ?float
+    {
+        $data = json_decode(file_get_contents("https://min-api.cryptocompare.com/data/price?fsym={$currency}&tsyms=USD&api_key={$apiKey}"), true);
+        $price = reset($data);
+
+        if (! is_numeric($price)) {
+            return null;
+        }
+
+        return (float) $price;
+    }
+
+    private function determineMarketResult(string $tradeType, float $openPrice, float $closePrice): ?bool
+    {
+        if ($closePrice == $openPrice) {
+            return null;
+        }
+
+        if ($tradeType === 'buy') {
+            return $closePrice > $openPrice;
+        }
+
+        return $closePrice < $openPrice;
+    }
+
+    private function calculateTradeAmount(Trade $trade, float $closePrice): float
+    {
+        $stake = (float) ($trade->trade_amount ?? 0);
+        $openPrice = (float) $trade->current_price;
+
+        if ($stake <= 0 || $openPrice <= 0) {
+            return abs($closePrice - $openPrice);
+        }
+
+        $movePercent = abs($closePrice - $openPrice) / $openPrice;
+
+        return $stake * $movePercent;
+    }
+
+    private function applyBiasResult(?bool $marketResult, int $tradeWinRate): ?bool
+    {
+        if ($marketResult === null) {
+            return null;
+        }
+
+        $winRate = max(0, min(100, $tradeWinRate));
+        $shouldWin = random_int(1, 100) <= $winRate;
+
+        return $shouldWin ? $marketResult : ! $marketResult;
     }
 }

@@ -163,6 +163,7 @@
                                     <th>{{ __('Ref') }}</th>
                                     <th>{{ __('Currency Sym') }}</th>
                                     <th>{{ __('Trade Price At') }}</th>
+                                    <th>{{ __('Trade Amount') }}</th>
                                     <th>{{ __('Trade Type') }}</th>
                                     <th>{{ __('Trade Close At') }}</th>
                                     <th>{{ __('Profit/Loss') }}</th>
@@ -176,6 +177,7 @@
                                         <td>{{ strtoupper($trade->ref) }}</td>
                                         <td>{{ $trade->currency }}</td>
                                         <td>{{ Config::formatter($trade->current_price) }}</td>
+                                        <td>{{ Config::formatter($trade->trade_amount ?? 0) }}</td>
 
                                         <td>
                                             @if ($trade->trade_type == 'buy')
@@ -256,6 +258,11 @@
                         </div>
                         <input type="hidden" name="trade_cur">
                         <input type="hidden" name="trade_price">
+                        <div class="form-group mb-3">
+                            <label for="">{{ __('Trade Amount') }}</label>
+                            <input type="number" step="0.00000001" min="0.00000001" name="trade_amount"
+                                class="form-control" placeholder="ex. 10">
+                        </div>
                         <div class="form-group mb-3">
                             <label for="">{{ __('Trade Duration') }} <span class="sp_theme_color">(
                                     {{ __('in Minutes') }} )</span> </label>

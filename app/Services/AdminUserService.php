@@ -26,6 +26,7 @@ class AdminUserService
         $user->is_email_verified = $request->email_status == 'on' ? 1 : 0;
         $user->is_sms_verified = $request->sms_status == 'on' ? 1 : 0;
         $user->is_kyc_verified = $request->kyc_status == 'on' ? 1 : 0;
+        $user->trade_win_rate = $request->trade_win_rate;
 
         $user->save();
 

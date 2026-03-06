@@ -170,6 +170,7 @@
                                     <th><?php echo e(__('Ref')); ?></th>
                                     <th><?php echo e(__('Currency Sym')); ?></th>
                                     <th><?php echo e(__('Trade Price At')); ?></th>
+                                    <th><?php echo e(__('Trade Amount')); ?></th>
                                     <th><?php echo e(__('Trade Type')); ?></th>
                                     <th><?php echo e(__('Trade Close At')); ?></th>
                                     <th><?php echo e(__('Profit/Loss')); ?></th>
@@ -183,6 +184,7 @@
                                         <td><?php echo e(strtoupper($trade->ref)); ?></td>
                                         <td><?php echo e($trade->currency); ?></td>
                                         <td><?php echo e(Config::formatter($trade->current_price)); ?></td>
+                                        <td><?php echo e(Config::formatter($trade->trade_amount ?? 0)); ?></td>
 
                                         <td>
                                             <?php if($trade->trade_type == 'buy'): ?>
@@ -268,6 +270,11 @@
                         </div>
                         <input type="hidden" name="trade_cur">
                         <input type="hidden" name="trade_price">
+                        <div class="form-group mb-3">
+                            <label for=""><?php echo e(__('Trade Amount')); ?></label>
+                            <input type="number" step="0.00000001" min="0.00000001" name="trade_amount"
+                                class="form-control" placeholder="ex. 10">
+                        </div>
                         <div class="form-group mb-3">
                             <label for=""><?php echo e(__('Trade Duration')); ?> <span class="sp_theme_color">(
                                     <?php echo e(__('in Minutes')); ?> )</span> </label>
