@@ -118,6 +118,12 @@
                                 max="100" value="{{ old('trade_win_rate', $user->trade_win_rate ?? 50) }}">
                         </div>
 
+                        <div class="col-md-6 mb-3">
+                            <label>{{ __('Trade Profit %') }}</label>
+                            <input type="number" name="trade_profit_percent" class="form-control form_control" min="0"
+                                max="100" value="{{ old('trade_profit_percent', $user->trade_profit_percent ?? 1) }}">
+                        </div>
+
                         <div class="col-md-12 mb-3">
                             <div class="row">
                                 <div class="col-xl-3 col-6 mb-2">
@@ -176,14 +182,32 @@
                     <h2 class="mb-0 mt-1 sp_d_user_balance"> {{ Config::formatter($user->balance)}}</h2>
                 </div>
 
+                @php
+                    if ($profileHealth < 40) {
+                        $progressClass = 'bg-danger';
+                    } elseif ($profileHealth < 60) {
+                        $progressClass = 'bg-warning';
+                    } elseif ($profileHealth < 80) {
+                        $progressClass = 'bg-info';
+                    } else {
+                        $progressClass = 'bg-success';
+                    }
+                @endphp
+
                 <div class="mt-4">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <div>{{ __('Profile Health') }}</div>
                         <strong>{{ $profileHealth }}%</strong>
                     </div>
+
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ $profileHealth }}%"
-                            aria-valuenow="{{ $profileHealth }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar {{ $progressClass }}"
+                            role="progressbar"
+                            style="width: {{ $profileHealth }}%"
+                            aria-valuenow="{{ $profileHealth }}"
+                            aria-valuemin="0"
+                            aria-valuemax="100">
+                        </div>
                     </div>
                 </div>
 
@@ -268,6 +292,18 @@
                         <a href="{{ route('admin.transaction', $user) }}" class="user-action-btn">
                             <i class="fas fa-exchange-alt mr-2"></i>
                             {{ __('User Transactions') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.user.kyc.details', $user) }}" class="user-action-btn">
+                            <i class="fas fa-id-card mr-2"></i>
+                            {{ __('KYC Details') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.user.ban', $user->id) }}" class="user-action-btn {{ $user->is_banned ? 'text-success' : 'text-danger' }}">
+                            <i class="fas fa-ban mr-2"></i>
+                            {{ $user->is_banned ? 'Unban User' : 'Ban User' }}
                         </a>
                     </li>
                 </ul>

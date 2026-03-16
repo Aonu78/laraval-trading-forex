@@ -77,6 +77,14 @@
                                 {{ __('BCH') }}
                             </label>
                         </div>
+
+                        <div class="sp_site_radio">
+                            <input type="radio" class="form-check-input currency" id="trad-10" name="currency"
+                                value="XAUT">
+                            <label class="form-check-label" for="trad-10">
+                                XAUT
+                            </label>
+                        </div>
                     </div>
 
                     <div>

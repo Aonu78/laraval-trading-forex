@@ -137,6 +137,12 @@
             </div>
         </div>
 
+        <div class="mb-4 col-xxl-12 col-lg-12 col-sm-12">
+            <label for="exclusive_offer">{{ __('Exclusive Offer') }}</label>
+            <textarea name="exclusive_offer" class="form-control" rows="5">{{ Config::config()->exclusive_offer ?? '' }}</textarea>
+            <small>Use {{ Config::config()->exclusive_offer }} in user dashboard templates</small>
+        </div>
+
     </div>
 
     

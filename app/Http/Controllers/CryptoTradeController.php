@@ -171,22 +171,20 @@ class CryptoTradeController extends Controller
                 continue;
             }
 
-            $amount = $this->calculateTradeAmount($trade, $currentPrice);
+            $stake = (float) ($trade->trade_amount ?? 0);
+            $profitPercent = (int) ($trade->user->trade_profit_percent ?? 1);
+            $profit = $stake * ($profitPercent / 100.0);
             $marketResult = $this->determineMarketResult($trade->trade_type, (float) $trade->current_price, $currentPrice);
-            $finalResult = $this->applyBiasResult($marketResult, (int) ($trade->user->trade_win_rate ?? 50));
-
-            if ($finalResult === null) {
-                $this->closeNeutralTrade($trade);
-                continue;
-            }
+            $winRate = (int) ($trade->user->trade_win_rate ?? 50);
+            $finalResult = rand(1, 100) <= $winRate;
 
             if ($finalResult) {
-                $charge = ($config->trade_charge / 100) * $amount;
-                $userAmount = $amount - $charge;
+                $charge = ($config->trade_charge / 100) * $profit;
+                $userAmount = $profit - $charge;
                 $type = '+';
 
                 $trade->profit_type = $type;
-                $trade->profit_amount = $amount;
+                $trade->profit_amount = $profit;
                 $trade->loss_amount = 0;
                 $trade->charge = $charge;
                 $trade->status = 1;
@@ -199,11 +197,11 @@ class CryptoTradeController extends Controller
 
                 $trade->profit_type = $type;
                 $trade->profit_amount = 0;
-                $trade->loss_amount = $amount;
+                $trade->loss_amount = $stake;
                 $trade->charge = 0;
                 $trade->status = 1;
 
-                $trade->user->balance -= $amount;
+                $trade->user->balance -= $stake;
                 $trade->user->save();
             }
 
@@ -211,7 +209,7 @@ class CryptoTradeController extends Controller
 
             Transaction::create([
                 'trx' => $trade->ref,
-                'amount' => $amount,
+                'amount' => $finalResult ? $profit : $stake,
                 'details' => 'Trade Return',
                 'charge' => $charge,
                 'type' => $type,

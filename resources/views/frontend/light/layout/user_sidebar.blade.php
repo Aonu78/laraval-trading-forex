@@ -24,7 +24,8 @@
     </a>
 
     <div class="user-sidebar-bottom">
-        <div id="countdown"></div>
+        <div id="">{{ Config::config()->exclusive_offer }}</div>
+        {{-- <div id="countdown"></div> --}}
     </div>
 
     <ul class="sidebar-menu">

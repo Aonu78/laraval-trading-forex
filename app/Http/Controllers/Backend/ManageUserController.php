@@ -87,6 +87,19 @@ class ManageUserController extends Controller
     {
         $address = (object) ($user->address ?? []);
 
+        $score = 0;
+
+        // Email verification = 30%
+        if ($user->is_email_verified) {
+            $score += 30;
+        }
+
+        // KYC verification = 40%
+        if ($user->is_kyc_verified) {
+            $score += 40;
+        }
+
+        // Remaining 30% fields (5% each)
         $fields = [
             $user->phone,
             $user->image,
@@ -94,20 +107,16 @@ class ManageUserController extends Controller
             $address->city ?? null,
             $address->state ?? null,
             $address->zip ?? null,
-            $user->kyc_information,
         ];
 
-        $completed = collect($fields)->filter(function ($value) {
-            if (is_array($value)) {
-                return count(array_filter($value)) > 0;
+        foreach ($fields as $field) {
+            if (!is_null($field) && trim((string)$field) !== '') {
+                $score += 5;
             }
+        }
 
-            return !is_null($value) && trim((string) $value) !== '';
-        })->count();
-
-        return (int) round(($completed / count($fields)) * 100);
+        return min($score, 100);
     }
-
     public function userUpdate(AdminUserRequest $request)
     {
         $isSuccess = $this->userservice->update($request);
@@ -284,5 +293,14 @@ class ManageUserController extends Controller
         SendEmailJob::dispatch($data);
 
         return redirect()->route('admin.user.index')->with('success', 'Successfully Send Mail');
+    }
+
+    public function banUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->is_banned = ! $user->is_banned;
+        $user->save();
+
+        return back()->with('success', $user->is_banned ? 'User banned' : 'User unbanned');
     }
 }

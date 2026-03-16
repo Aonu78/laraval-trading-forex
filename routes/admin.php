@@ -122,6 +122,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('kyc/{status}/{id}', [ManageUserController::class, 'kycStatus'])->name('kyc.status');
 
             Route::get('login/user/{id}', [ManageUserController::class, 'loginAsUser'])->name('login');
+            Route::get('ban/{id}', [ManageUserController::class, 'banUser'])->name('ban');
         });
         // End User
 

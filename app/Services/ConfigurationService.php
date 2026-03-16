@@ -58,7 +58,8 @@ class ConfigurationService
                 'decimal_precision' => $request->decimal_precision,
                 'trade_charge' => $request->trade_charge,
                 'min_trade_balance' => $request->min_trade_balance,
-                'trade_limit' => $request->trade_limit
+'trade_limit' => $request->trade_limit,
+                'exclusive_offer' => $request->exclusive_offer ?? ''
             ]);
 
             Helper::setEnv([

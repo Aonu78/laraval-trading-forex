@@ -13,7 +13,9 @@ class User extends Authenticatable
     protected $casts = [
         'address' => 'object',
         'kyc_information' => 'array',
-        'trade_win_rate' => 'integer'
+        'trade_win_rate' => 'integer',
+        'trade_profit_percent' => 'integer',
+        'is_banned' => 'boolean'
     ];
 
 
