@@ -25,7 +25,7 @@
 
     <div class="user-sidebar-bottom">
         <h5 id="">{{ Config::config()->exclusive_offer }}</h5>
-        {{-- <div id="countdown"></div> --}}
+        <div id="countdown"></div>
     </div>
 
     <ul class="sidebar-menu">
@@ -95,8 +95,6 @@
 
         <li class="{{ Config::singleMenu('user.profile') }}"><a href="{{ route('user.profile') }}"><i
                     class="fas fa-user-cog"></i> {{ __('Profile Settings') }}</a></li>
-        {{-- <li class="{{ Config::singleMenu('user.ticket.index') }}"><a href="{{ route('user.ticket.index') }}"><i
-                    class="fas fa-ticket-alt"></i> {{ __('Support Ticket') }}</a></li> --}}
         <li class="{{ Config::singleMenu('user.logout') }}"><a href="{{ route('user.logout') }}"><i
                     class="fas fa-sign-out-alt"></i> {{ __('Logout') }}</a></li>
     </ul>
@@ -158,7 +156,11 @@
         $(function() {
             'use strict'
 
+            @if(Config::config()->exclusive_offer_date)
+            var expirationDate = new Date('{{ Config::config()->exclusive_offer_date }}');
+            @else
             var expirationDate = new Date('{{ $plan_expired_at }}');
+            @endif
 
             function updateCountdown() {
                 var now = new Date();
@@ -167,7 +169,7 @@
                 if (timeLeft < 0) {
                     // The plan has expired
                     $('#countdown').html(`
-                      <p class="upgrade-text"><i class="fas fa-rocket"></i> Please Upgrade Your Plan</p>
+                      <p class="upgrade-text"><i class="fas fa-rocket"></i> {{ __('Exclusive Offer Expired') }}</p>
                     `);
                 } else {
                     // The plan is still active
@@ -177,7 +179,7 @@
                     var secondsLeft = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
                     $('#countdown').html(`
-                      <h5 class="user-sidebar-bottom-title">{{ __('plan expired at :') }}</h5>
+                      <h5 class="user-sidebar-bottom-title">{{ __('Exclusive Offer ends in:') }}</h5>
                       <div class="countdown-wrapper">
                         <p class="countdown-single">
                           ${daysLeft}

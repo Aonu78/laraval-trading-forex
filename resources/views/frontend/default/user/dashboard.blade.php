@@ -59,11 +59,27 @@
                     <div class="custom-xxl-6 col-xxl-3 col-xl-6 col-lg-3 col-6">
                         <div class="d-card d-icon-card">
                             <div class="d-card-icon gr-bg-4">
-                                <i class="las la-ticket-alt"></i>
+                                <i class="las la-heartbeat"></i>
                             </div>
                             <div class="d-card-content">
-                                <h4 class="d-card-amount">{{ $totalSupportTickets }}</h4>
-                                <p class="d-card-caption">{{ __('Support Ticket') }}</p>
+                                @php
+                                    $healthClass = $profileHealth < 40 ? 'bg-danger' : ($profileHealth < 60 ? 'bg-warning' : ($profileHealth < 80 ? 'bg-info' : 'bg-success'));
+                                @endphp
+                                <h4 class="d-card-amount profile-health-percent">{{ $profileHealth }}%</h4>
+                                <p class="d-card-caption">{{ __('Profile Health') }}</p>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar {{ $healthClass }}"
+                                        role="progressbar"
+                                        style="width: {{ $profileHealth }}%"
+                                        aria-valuenow="{{ $profileHealth }}"
+                                        aria-valuemin="0"
+                                        aria-valuemax="100">
+                                    </div>
+                                </div>
+
+                                <div class="health-bar small">
+                                    <div class="health-progress {{ $healthClass }}" style="width: {{ $profileHealth }}%"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -110,7 +126,7 @@
                                 <div id="chart3" class="d-flex justify-content-center"></div>
                             </div>
 
-                            <h6 class="mb-2 mt-4">{{ __('Your Referral Link') }}</h6>
+                            {{-- <h6 class="mb-2 mt-4">{{ __('Your Referral Link') }}</h6>
                             <form>
                                 <div class="input-group">
                                     <input type="text" class="form-control copy-text" placeholder="Referral link"
@@ -118,12 +134,12 @@
                                         <button type="button" class="input-group-text sp_bg_base px-4 copy
                                         ">{{ __('Copy') }}</button>
                                 </div>
-                            </form>
+                            </form> --}}
                         </div>
                     </div>
                 </div>
 
-                <div class="d-card mt-4">
+                {{-- <div class="d-card mt-4">
                     <h5 class="">{{ __('All Signal') }}</h5>
                     <div id="chart"></div>
                 </div>
@@ -174,7 +190,7 @@
                         </div>
                     @endif
 
-                </div>
+                </div> --}}
             </div>
         </div>
 
@@ -217,14 +233,14 @@
                                 <div id="chart2" class="d-flex justify-content-center"></div>
                             </div>
 
-                            <h6 class="mb-2 mt-4">{{ __('Your Referral Link') }}</h6>
+                            {{-- <h6 class="mb-2 mt-4">{{ __('Your Referral Link') }}</h6>
                             <form>
                                 <div class="input-group">
                                     <input type="text" class="form-control copy-text2" placeholder="Referral link"
                                         value="{{ route('user.register', $user->username) }}" readonly>
                                     <button type="button" class="input-group-text sp_bg_base px-4 copy2">{{ __('Copy') }}</button>
                                 </div>
-                            </form>
+                            </form> --}}
                         </div>
                     </div>
                 </div>

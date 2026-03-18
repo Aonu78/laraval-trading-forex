@@ -24,23 +24,23 @@
     </a>
 
     <div class="user-sidebar-bottom">
-        <div id="">{{ Config::config()->exclusive_offer }}</div>
-        {{-- <div id="countdown"></div> --}}
+        {{-- <div id="">{{ Config::config()->exclusive_offer }}</div> --}}
+        <div id="countdown"></div>
     </div>
 
     <ul class="sidebar-menu">
         <li class="{{ Config::singleMenu('user.dashboard') }}"><a href="{{ route('user.dashboard') }}" class="active"><i
                     class="fas fa-home"></i>
                 {{ __('Dashboard') }}</a></li>
-        <li class="{{ Config::singleMenu('user.signal.all') }}"><a href="{{ route('user.signal.all') }}"><i
-                    class="fas fa-chart-bar"></i> {{ __('All Signal') }}</a></li>
+        {{-- <li class="{{ Config::singleMenu('user.signal.all') }}"><a href="{{ route('user.signal.all') }}"><i
+                    class="fas fa-chart-bar"></i> {{ __('All Signal') }}</a></li> --}}
 
         <li><a href="{{ route('user.trade') }}" class="{{ Config::singleMenu('user.trade') }}"><i
                     class="fas fa-chart-line"></i></i>
                 {{ __('Trade') }}</a></li>
 
-        <li class="{{ Config::singleMenu('user.plans') }}"><a href="{{ route('user.plans') }}"><i
-                    class="fas fa-clipboard-list"></i>{{ __('Plans') }}</a></li>
+        {{-- <li class="{{ Config::singleMenu('user.plans') }}"><a href="{{ route('user.plans') }}"><i
+                    class="fas fa-clipboard-list"></i>{{ __('Plans') }}</a></li> --}}
 
         <li class="{{ Config::singleMenu('user.deposit') }}"><a href="{{ route('user.deposit') }}"><i
                     class="fas fa-credit-card"></i>{{ __('Deposit Now') }}</a></li>
@@ -48,8 +48,8 @@
         <li class="{{ Config::singleMenu('user.withdraw') }}"><a href="{{ route('user.withdraw') }}"><i
                     class="fas fa-hand-holding-usd"></i> {{ __('Withdraw') }}</a></li>
 
-        <li class="{{ Config::singleMenu('user.transfer_money') }}"><a href="{{ route('user.transfer_money') }}"><i
-                    class="fas fa-exchange-alt"></i> {{ __('Transfer Money') }}</a></li>
+        {{-- <li class="{{ Config::singleMenu('user.transfer_money') }}"><a href="{{ route('user.transfer_money') }}"><i
+                    class="fas fa-exchange-alt"></i> {{ __('Transfer Money') }}</a></li> --}}
 
 
         <li
@@ -72,7 +72,7 @@
                     <a href="{{ route('user.transaction.log') }}">{{ __('Transaction Log') }}</a>
                 </li>
 
-                <li class="{{ Config::singleMenu('user.transfer_money.log') }}">
+                {{-- <li class="{{ Config::singleMenu('user.transfer_money.log') }}">
                     <a href="{{ route('user.transfer_money.log') }}">{{ __('Transfer Money Log') }}</a>
                 </li>
 
@@ -86,17 +86,16 @@
 
                 <li class="{{ Config::singleMenu('user.subscription') }}">
                     <a href="{{ route('user.subscription') }}">{{ __('Subscription Log') }}</a>
-                </li>
+                </li> --}}
             </ul>
         </li>
 
-        <li class="{{ Config::singleMenu('user.refferalLog') }}"><a href="{{ route('user.refferalLog') }}"><i
-                    class="fas fa-user-cog"></i> {{ __('Refferal Log') }}</a></li>
+        {{-- <li class="{{ Config::singleMenu('user.refferalLog') }}"><a href="{{ route('user.refferalLog') }}"><i
+                    class="fas fa-user-cog"></i> {{ __('Refferal Log') }}</a></li> --}}
 
         <li class="{{ Config::singleMenu('user.profile') }}"><a href="{{ route('user.profile') }}"><i
                     class="fas fa-user-cog"></i> {{ __('Profile Settings') }}</a></li>
-        <li class="{{ Config::singleMenu('user.ticket.index') }}"><a href="{{ route('user.ticket.index') }}"><i
-                    class="fas fa-ticket-alt"></i> {{ __('Support Ticket') }}</a></li>
+        
         <li class="{{ Config::singleMenu('user.logout') }}"><a href="{{ route('user.logout') }}"><i
                     class="fas fa-sign-out-alt"></i> {{ __('Logout') }}</a></li>
     </ul>
@@ -114,10 +113,9 @@
         </li>
 
         <li>
-            <a href="{{ route('user.transfer_money') }}"
-                class="{{ Config::activeMenu(route('user.transfer_money')) }}">
-                <i class="fas fa-exchange-alt"></i>
-                <span>{{ __('Send Money') }}</span>
+            <a href="{{ route('user.trade') }}" class="{{ Config::activeMenu(route('user.trade')) }}">
+                <i class="fas fa-chart-line"></i>
+                <span>{{ __('Trade') }}</span>
             </a>
         </li>
         
@@ -152,26 +150,30 @@
         $(function() {
             'use strict'
 
+            @if(Config::config()->exclusive_offer_date)
+            var expirationDate = new Date('{{ Config::config()->exclusive_offer_date }}');
+            @else
             var expirationDate = new Date('{{ $plan_expired_at }}');
+            @endif
 
             function updateCountdown() {
                 var now = new Date();
                 var timeLeft = expirationDate - now;
 
                 if (timeLeft < 0) {
-                    // The plan has expired
+                    // Expired
                     $('#countdown').html(`
-                      <p class="upgrade-text"><i class="fas fa-rocket"></i> Please Upgrade Your Plan</p>
+                      <p class="upgrade-text"><i class="fas fa-rocket"></i> {{ __('Exclusive Offer Expired') }}</p>
                     `);
                 } else {
-                    // The plan is still active
+                    // Active
                     var daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
                     var hoursLeft = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     var minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                     var secondsLeft = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
+                    var offerText = '{{ Config::config()->exclusive_offer }}';
                     $('#countdown').html(`
-                      <h5 class="user-sidebar-bottom-title">{{ __('plan expired at :') }}</h5>
+                      <h5 class="user-sidebar-bottom-title">${offerText}</h5>
                       <div class="countdown-wrapper">
                         <p class="countdown-single">
                           ${daysLeft}

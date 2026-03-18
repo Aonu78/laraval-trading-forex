@@ -143,6 +143,12 @@
             <small>Use <?php echo e(Config::config()->exclusive_offer); ?> in user dashboard templates</small>
         </div>
 
+        <div class="mb-4 col-xxl-12 col-lg-12 col-sm-12">
+            <label for="exclusive_offer_date"><?php echo e(__('Exclusive Offer Expiry Date')); ?></label>
+            <input type="date" name="exclusive_offer_date" class="form-control" value="<?php echo e(Config::config()->exclusive_offer_date?->format('Y-m-d') ?? ''); ?>">
+            <small>Countdown will show time remaining until this date (leave empty to hide/use plan expiry)</small>
+        </div>
+
     </div>
 
     

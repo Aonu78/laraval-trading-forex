@@ -1,20 +1,20 @@
-@extends(Config::theme() . 'layout.auth')
 
-@section('content')
 
-@php
+<?php $__env->startSection('content'); ?>
+
+<?php
     $plan_expired_at = now();
-@endphp
+?>
 
-@if (auth()->user()->currentplan)
-    @php
+<?php if(auth()->user()->currentplan): ?>
+    <?php
         $is_subscribe = auth()->user()->currentplan()->where('is_current', 1)->first();
 
         if($is_subscribe){
             $plan_expired_at =  $is_subscribe->plan_expired_at;
         }
-    @endphp
-@endif
+    ?>
+<?php endif; ?>
 
     <div class="row g-sm-4 g-3">
         <div class="col-xxl-9 col-xl-8 d-custom-left">
@@ -29,8 +29,8 @@
                                 <i class="las la-credit-card"></i>
                             </div>
                             <div class="d-card-content">
-                                <h4 class="d-card-amount">{{ Config::formatter($totalDeposit) }}</h4>
-                                <p class="d-card-caption">{{ __('Total Deposit') }}</p>
+                                <h4 class="d-card-amount"><?php echo e(Config::formatter($totalDeposit)); ?></h4>
+                                <p class="d-card-caption"><?php echo e(__('Total Deposit')); ?></p>
                             </div>
                         </div>
                     </div>
@@ -40,8 +40,8 @@
                                 <i class="las la-hand-holding-usd"></i>
                             </div>
                             <div class="d-card-content">
-                                <h4 class="d-card-amount">{{ Config::formatter($totalWithdraw) }}</h4>
-                                <p class="d-card-caption">{{ __('Total Withdraw') }}</p>
+                                <h4 class="d-card-amount"><?php echo e(Config::formatter($totalWithdraw)); ?></h4>
+                                <p class="d-card-caption"><?php echo e(__('Total Withdraw')); ?></p>
                             </div>
                         </div>
                     </div>
@@ -51,8 +51,8 @@
                                 <i class="las la-chart-bar"></i>
                             </div>
                             <div class="d-card-content">
-                                <h4 class="d-card-amount">{{ Config::formatter($totalPayments) }}</h4>
-                                <p class="d-card-caption">{{ __('Total Payment') }}</p>
+                                <h4 class="d-card-amount"><?php echo e(Config::formatter($totalPayments)); ?></h4>
+                                <p class="d-card-caption"><?php echo e(__('Total Payment')); ?></p>
                             </div>
                         </div>
                     </div>
@@ -62,23 +62,24 @@
                                 <i class="las la-heartbeat"></i>
                             </div>
                             <div class="d-card-content">
-                                @php
+                                <?php
                                     $healthClass = $profileHealth < 40 ? 'bg-danger' : ($profileHealth < 60 ? 'bg-warning' : ($profileHealth < 80 ? 'bg-info' : 'bg-success'));
-                                @endphp
-                                <h4 class="d-card-amount profile-health-percent">{{ $profileHealth }}%</h4>
-                                <p class="d-card-caption">{{ __('Profile Health') }}</p>
+                                ?>
+                                <h4 class="d-card-amount profile-health-percent"><?php echo e($profileHealth); ?>%</h4>
+                                <p class="d-card-caption"><?php echo e(__('Profile Health')); ?></p>
+                                
                                 <div class="progress" style="height: 8px;">
-                                    <div class="progress-bar {{ $healthClass }}"
+                                    <div class="progress-bar <?php echo e($healthClass); ?>"
                                         role="progressbar"
-                                        style="width: {{ $profileHealth }}%"
-                                        aria-valuenow="{{ $profileHealth }}"
+                                        style="width: <?php echo e($profileHealth); ?>%"
+                                        aria-valuenow="<?php echo e($profileHealth); ?>"
                                         aria-valuemin="0"
                                         aria-valuemax="100">
                                     </div>
                                 </div>
 
                                 <div class="health-bar small">
-                                    <div class="health-progress {{ $healthClass }}" style="width: {{ $profileHealth }}%"></div>
+                                    <div class="health-progress <?php echo e($healthClass); ?>" style="width: <?php echo e($profileHealth); ?>%"></div>
                                 </div>
                             </div>
                         </div>
@@ -90,27 +91,27 @@
                         <div class="col-xl-12 col-lg-6">
                             <div class="d-card user-card not-hover"> 
                                 <div class="text-center">
-                                    <h5 class="user-card-title">{{ __('Total Balance') }}</h5>
-                                    <h4 class="d-card-balance mt-xxl-3 mt-2">{{ Config::formatter($totalbalance) }}</h4>
+                                    <h5 class="user-card-title"><?php echo e(__('Total Balance')); ?></h5>
+                                    <h4 class="d-card-balance mt-xxl-3 mt-2"><?php echo e(Config::formatter($totalbalance)); ?></h4>
                                     <div class="mt-4">
-                                        <a href="{{ route('user.withdraw') }}" class="btn btn-md sp_btn_danger me-xxl-3 me-2"><i class="las la-minus-circle fs-lg"></i> {{ __('Withdraw') }}</a>
-                                        <a href="{{ route('user.deposit') }}" class="btn btn-md sp_btn_success ms-xxl-3 ms-2"><i class="las la-plus-circle fs-lg"></i> {{ __('Deposit') }}</a>
+                                        <a href="<?php echo e(route('user.withdraw')); ?>" class="btn btn-md sp_btn_danger me-xxl-3 me-2"><i class="las la-minus-circle fs-lg"></i> <?php echo e(__('Withdraw')); ?></a>
+                                        <a href="<?php echo e(route('user.deposit')); ?>" class="btn btn-md sp_btn_success ms-xxl-3 ms-2"><i class="las la-plus-circle fs-lg"></i> <?php echo e(__('Deposit')); ?></a>
                                     </div>
                                 </div>
                                 <hr class="my-4">
                                 <ul class="recent-transaction-list mt-4">
-                                    @foreach ($transactions as $trans)
+                                    <?php $__currentLoopData = $transactions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $trans): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <li class="single-recent-transaction">
                                         <div class="content">
-                                            <h6 class="title">{{$trans->details}}</h6>
-                                            <span>{{$trans->created_at->format('d F, Y')}}</span>
+                                            <h6 class="title"><?php echo e($trans->details); ?></h6>
+                                            <span><?php echo e($trans->created_at->format('d F, Y')); ?></span>
                                         </div>
-                                        <p class="recent-transaction-amount {{$trans->type == '+' ?  "sp_text_success" : 'sp_text_danger' }}">{{Config::formatter($trans->amount)}}</p>
+                                        <p class="recent-transaction-amount <?php echo e($trans->type == '+' ?  "sp_text_success" : 'sp_text_danger'); ?>"><?php echo e(Config::formatter($trans->amount)); ?></p>
                                     </li>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     
                                 </ul>
-                                <a href="{{ route('user.transaction.log') }}" class="btn sp_theme_btn mt-4 w-100"><i class="fas fa-rocket me-2"></i> {{ __('View All Transaction') }}</a>
+                                <a href="<?php echo e(route('user.transaction.log')); ?>" class="btn sp_theme_btn mt-4 w-100"><i class="fas fa-rocket me-2"></i> <?php echo e(__('View All Transaction')); ?></a>
                             </div>
                         </div>
                         <div class="col-xl-12 col-lg-6">
@@ -118,71 +119,65 @@
                                 <div id="chart3" class="d-flex justify-content-center"></div>
                             </div>
 
-                            {{-- <h6 class="mb-2 mt-4">{{ __('Your Referral Link') }}</h6>
-                            <form>
-                                <div class="input-group">
-                                    <input type="text" class="form-control copy-text" placeholder="Referral link"
-                                        value="{{ route('user.register', $user->username) }}" readonly>
-                                        <button type="button" class="input-group-text sp_bg_base px-4 copy
-                                        ">{{ __('Copy') }}</button>
-                                </div>
-                            </form> --}}
+                            
                         </div>
                     </div>
                 </div>
 
-                {{-- <div class="d-card mt-4">
-                    <h5 class="">{{ __('All Signal') }}</h5>
+                <div class="d-card mt-4">
+                    <h5 class=""><?php echo e(__('All Signal')); ?></h5>
                     <div id="chart"></div>
                 </div>
 
                 <div class="sp_site_card mt-4">
                     <div class="card-header">
-                        <h5>{{ __('Latest Signal') }}</h5>
+                        <h5><?php echo e(__('Latest Signal')); ?></h5>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table sp_site_table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Signal Date') }}</th>
-                                        <th>{{ __('Title') }}</th>
-                                        <th>{{ __('Action') }}</th>
+                                        <th><?php echo e(__('Signal Date')); ?></th>
+                                        <th><?php echo e(__('Title')); ?></th>
+                                        <th><?php echo e(__('Action')); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
 
-                                    @forelse ($signals as $signal)
+                                    <?php $__empty_1 = true; $__currentLoopData = $signals; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $signal): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <tr>
-                                            <td data-caption="{{ __('Signal Date') }}">
-                                                {{ $signal->created_at->format('dS M, Y -') }}
+                                            <td data-caption="<?php echo e(__('Signal Date')); ?>">
+                                                <?php echo e($signal->created_at->format('dS M, Y -')); ?>
 
-                                                <span class="table-date">{{ $signal->created_at->format('h:i:s A') }}</span>
+
+                                                <span class="table-date"><?php echo e($signal->created_at->format('h:i:s A')); ?></span>
                                             </td>
-                                            <td data-caption="{{ __('Title') }}">{{ $signal->signal->title }}</td>
-                                            <td data-caption="{{ __('Action') }}">
-                                                <a href="{{ route('user.signal.details', ['id' => $signal->signal->id, 'slug' => Str::slug($signal->signal->title)]) }}"
+                                            <td data-caption="<?php echo e(__('Title')); ?>"><?php echo e($signal->signal->title); ?></td>
+                                            <td data-caption="<?php echo e(__('Action')); ?>">
+                                                <a href="<?php echo e(route('user.signal.details', ['id' => $signal->signal->id, 'slug' => Str::slug($signal->signal->title)])); ?>"
                                                     class="view-btn"><i class="far fa-eye"></i></a>
                                             </td>
                                         </tr>
-                                    @empty
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <tr>
-                                            <td class="text-center" colspan="100%">{{ __('No Signals Found') }}</td>
+                                            <td class="text-center" colspan="100%"><?php echo e(__('No Signals Found')); ?></td>
                                         </tr>
-                                    @endforelse
+                                    <?php endif; ?>
 
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    @if ($signals->hasPages())
+                    <?php if($signals->hasPages()): ?>
                         <div class="card-footer">
-                            {{ $signals->links() }}
-                        </div>
-                    @endif
+                            <?php echo e($signals->links()); ?>
 
-                </div> --}}
+                        </div>
+                    <?php endif; ?>
+
+                </div>
             </div>
         </div>
 
@@ -193,31 +188,31 @@
                         <div class="col-xl-12 col-lg-6">
                             <div class="d-card user-card not-hover"> 
                                 <div class="text-center">
-                                    <h5 class="user-card-title">{{ __('Total Balance') }}</h5>
-                                    <h4 class="d-card-balance mt-xxl-3 mt-2">{{ Config::formatter($totalbalance) }}</h4>
+                                    <h5 class="user-card-title"><?php echo e(__('Total Balance')); ?></h5>
+                                    <h4 class="d-card-balance mt-xxl-3 mt-2"><?php echo e(Config::formatter($totalbalance)); ?></h4>
                                     <div class="mt-4">
-                                        <a href="{{ route('user.withdraw') }}" class="btn btn-md sp_btn_danger me-xxl-3 me-2"><i class="las la-minus-circle fs-lg"></i> {{ __('Withdraw') }}</a>
-                                        <a href="{{ route('user.deposit') }}" class="btn btn-md sp_btn_success ms-xxl-3 ms-2"><i class="las la-plus-circle fs-lg"></i> {{ __('Deposit') }}</a>
+                                        <a href="<?php echo e(route('user.withdraw')); ?>" class="btn btn-md sp_btn_danger me-xxl-3 me-2"><i class="las la-minus-circle fs-lg"></i> <?php echo e(__('Withdraw')); ?></a>
+                                        <a href="<?php echo e(route('user.deposit')); ?>" class="btn btn-md sp_btn_success ms-xxl-3 ms-2"><i class="las la-plus-circle fs-lg"></i> <?php echo e(__('Deposit')); ?></a>
                                     </div>
                                 </div>
 
                                 <hr class="my-4">
 
                                 <ul class="recent-transaction-list mt-4">
-                                    @foreach ($transactions as $trans)
+                                    <?php $__currentLoopData = $transactions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $trans): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         
                                     <li class="single-recent-transaction">
                                       
                                         <div class="content">
-                                            <h6 class="title">{{$trans->details}}</h6>
-                                            <span>{{$trans->created_at->format('d F, Y')}}</span>
+                                            <h6 class="title"><?php echo e($trans->details); ?></h6>
+                                            <span><?php echo e($trans->created_at->format('d F, Y')); ?></span>
                                         </div>
-                                        <p class="recent-transaction-amount {{$trans->type == '+' ?  "sp_text_success" : 'sp_text_danger' }}">{{number_format($trans->amount)}}</p>
+                                        <p class="recent-transaction-amount <?php echo e($trans->type == '+' ?  "sp_text_success" : 'sp_text_danger'); ?>"><?php echo e(number_format($trans->amount)); ?></p>
                                     </li>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     
                                 </ul>
-                                <a href="{{ route('user.transaction.log') }}" class="btn sp_theme_btn mt-4 w-100"><i class="fas fa-rocket me-2"></i> {{ __('View All Transaction') }}</a>
+                                <a href="<?php echo e(route('user.transaction.log')); ?>" class="btn sp_theme_btn mt-4 w-100"><i class="fas fa-rocket me-2"></i> <?php echo e(__('View All Transaction')); ?></a>
                             </div>
                         </div>
                         <div class="col-xl-12 col-lg-6">
@@ -225,32 +220,25 @@
                                 <div id="chart2" class="d-flex justify-content-center"></div>
                             </div>
 
-                            {{-- <h6 class="mb-2 mt-4">{{ __('Your Referral Link') }}</h6>
-                            <form>
-                                <div class="input-group">
-                                    <input type="text" class="form-control copy-text2" placeholder="Referral link"
-                                        value="{{ route('user.register', $user->username) }}" readonly>
-                                    <button type="button" class="input-group-text sp_bg_base px-4 copy2">{{ __('Copy') }}</button>
-                                </div>
-                            </form> --}}
+                            
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('external-css')
-    <link rel="stylesheet" href="{{ Config::cssLib('frontend', 'lib/apex.min.css') }}">
-@endpush
+<?php $__env->startPush('external-css'); ?>
+    <link rel="stylesheet" href="<?php echo e(Config::cssLib('frontend', 'lib/apex.min.css')); ?>">
+<?php $__env->stopPush(); ?>
 
 
-@push('external-script')
-    <script src="{{ Config::jsLib('frontend', 'lib/apex.min.js') }}"></script>
-@endpush
+<?php $__env->startPush('external-script'); ?>
+    <script src="<?php echo e(Config::jsLib('frontend', 'lib/apex.min.js')); ?>"></script>
+<?php $__env->stopPush(); ?>
 
-@push('script')
+<?php $__env->startPush('script'); ?>
     <script>
     $(function() {
         'use strict'
@@ -280,7 +268,7 @@
         });
 
 
-        var expirationDate = new Date('{{ $plan_expired_at }}');
+        var expirationDate = new Date('<?php echo e($plan_expired_at); ?>');
 
         function updateCountdown() {
             var now = new Date();
@@ -299,7 +287,7 @@
                 var secondsLeft = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
                 $('#countdownTwo').html(`
-                    <h5 class="d-left-countdown-title">{{ __('plan expired at :') }}</h5>
+                    <h5 class="d-left-countdown-title"><?php echo e(__('plan expired at :')); ?></h5>
                     <div class="countdown-wrapper">
                     <p class="countdown-single">
                         ${daysLeft}
@@ -329,7 +317,7 @@
         var options = {
             series: [{
                 name: 'Signal',
-                data: @json($signalGrapTotal)
+                data: <?php echo json_encode($signalGrapTotal, 15, 512) ?>
             }],
             legend: {
                 labels: {
@@ -361,7 +349,7 @@
                 curve: 'smooth'
             },
             xaxis: {
-                categories: @json($months),
+                categories: <?php echo json_encode($months, 15, 512) ?>,
                 labels: {
                     style: {
                         colors: '#2b2b2b',
@@ -404,7 +392,7 @@
 
         var options = {
        
-        series: [{{$totalAmount->sum()}}, {{$withdrawTotalAmount->sum()}}, {{$depositTotalAmount->sum()}}],
+        series: [<?php echo e($totalAmount->sum()); ?>, <?php echo e($withdrawTotalAmount->sum()); ?>, <?php echo e($depositTotalAmount->sum()); ?>],
         labels: ['Payment', 'Withdraw', 'Deposit'],
         chart: {
             type: 'donut',
@@ -476,7 +464,7 @@
         stroke: {
             show: true,
             width: 15,
-            colors: '#e7e7e7'
+            colors: '#1E1F25'
           },
           responsive: [
             { 
@@ -510,4 +498,6 @@
         chart2.render();
     })
     </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make(Config::theme() . 'layout.auth', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\p\Downloads\Compressed\signal_v5\main\resources\views/frontend/light/user/dashboard.blade.php ENDPATH**/ ?>

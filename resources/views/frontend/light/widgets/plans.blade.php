@@ -1,4 +1,4 @@
-@php
+{{-- @php
     $plans = \App\Models\Plan::whereStatus(true)
         ->latest()
         ->take(6)
@@ -224,4 +224,4 @@
             color: #fff;
         }
     </style>
-@endpush
+@endpush --}}

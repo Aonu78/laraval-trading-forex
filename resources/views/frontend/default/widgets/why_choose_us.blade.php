@@ -1,4 +1,4 @@
-<section class="choose-section sp_pt_120 sp_pb_120">
+<section class="choose-section sp_pt_120 sp_pb_120" id="why-chose-us">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-7 text-center">

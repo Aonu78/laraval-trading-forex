@@ -59,7 +59,8 @@ class ConfigurationService
                 'trade_charge' => $request->trade_charge,
                 'min_trade_balance' => $request->min_trade_balance,
 'trade_limit' => $request->trade_limit,
-                'exclusive_offer' => $request->exclusive_offer ?? ''
+                'exclusive_offer' => $request->exclusive_offer ?? '',
+                'exclusive_offer_date' => $request->exclusive_offer_date ?? null
             ]);
 
             Helper::setEnv([

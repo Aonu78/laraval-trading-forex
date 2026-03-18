@@ -13,6 +13,7 @@ class Configuration extends Model
         'fonts' => 'object',
         'email_config' => 'object',
         'seo_tags' => 'array',
-        'kyc' => 'array'
+        'kyc' => 'array',
+        'exclusive_offer_date' => 'datetime',
     ];
 }
