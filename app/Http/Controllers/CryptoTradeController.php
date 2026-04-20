@@ -22,7 +22,11 @@ class CryptoTradeController extends Controller
         })->when($request->date, function ($item) use ($request) {
             $item->whereDate('trade_opens_at', $request->date);
         })->where('user_id', auth()->id())->orderBy('id', 'desc')->paginate(Helper::pagination());
-
+        
+        $data['activeTrade'] = Trade::where('user_id', auth()->id())
+            ->where('status', 0) // running
+            ->latest()
+            ->first();
         return view(Helper::theme() . 'user.trading')->with($data);
     }
 
@@ -95,11 +99,10 @@ class CryptoTradeController extends Controller
             "trade_price" => "required",
             "trade_amount" => "required|numeric|gt:0",
             "type" => "required|in:buy,sell",
-            "duration" => "required|gt:0"
+            "duration" => "required|in:0.5,1,1.5,2" // restrict values
         ]);
 
         $user = auth()->user();
-
 
         if ($user->trades->count() >= Helper::config()->trade_limit) {
             return redirect()->back()->with('error', 'Per Day Trading Limit expired');
@@ -109,8 +112,6 @@ class CryptoTradeController extends Controller
             return redirect()->back()->with('error', 'You need to subscribe a plan to trade');
         }
 
-
-
         if ($request->trade_amount < Helper::config()->min_trade_balance) {
             return redirect()->back()->with('error', 'Minimum trade amount is ' . Helper::formatter(Helper::config()->min_trade_balance));
         }
@@ -119,6 +120,8 @@ class CryptoTradeController extends Controller
             return redirect()->back()->with('error', 'Insufficient balance for this trade amount');
         }
 
+        // ✅ Convert minutes → seconds
+        $durationInSeconds = $request->duration * 60;
 
         $ref = Str::random(16);
 
@@ -129,8 +132,8 @@ class CryptoTradeController extends Controller
             'current_price' => $request->trade_price,
             'trade_amount' => $request->trade_amount,
             'trade_type' => $request->type,
-            'duration' => $request->duration,
-            'trade_stop_at' => now()->addMinutes($request->duration),
+            'duration' => $durationInSeconds, // store seconds
+            'trade_stop_at' => now()->addSeconds($durationInSeconds), // correct
             'trade_opens_at' => now()
         ]);
 
