@@ -41,15 +41,19 @@
         <td>
             <form action="<?php echo e(route('admin.trade.result-mode', $trade->id)); ?>" method="POST">
                 <?php echo csrf_field(); ?>
-                <select name="result_mode" class="form-control form-control-sm" <?php if($trade->status): ?> disabled <?php endif; ?>>
+                <select name="result_mode" class="form-control form-control-sm"
+                    onchange="toggleTradeWinAmount(this)" <?php if($trade->status): ?> disabled <?php endif; ?>>
                     <option value="default" <?php if(($trade->result_mode ?? 'default') === 'default'): ?> selected <?php endif; ?>><?php echo e(__('Default')); ?></option>
                     <option value="force_win" <?php if(($trade->result_mode ?? 'default') === 'force_win'): ?> selected <?php endif; ?>><?php echo e(__('Force Win')); ?></option>
                     <option value="force_loss" <?php if(($trade->result_mode ?? 'default') === 'force_loss'): ?> selected <?php endif; ?>><?php echo e(__('Force Loss')); ?></option>
                 </select>
-                <input type="number" name="force_profit_amount" class="form-control form-control-sm"
-                    step="0.01" min="0"
-                    value="<?php echo e(old('force_profit_amount', $trade->force_profit_amount)); ?>"
-                    placeholder="<?php echo e(__('Win Amount')); ?>" <?php if($trade->status): ?> disabled <?php endif; ?>>
+                <div class="trade-win-amount-wrapper mt-2 <?php if(($trade->result_mode ?? 'default') !== 'force_win'): ?> d-none <?php endif; ?>">
+                    <input type="number" name="force_profit_amount" class="form-control form-control-sm"
+                        step="0.01" min="0"
+                        value="<?php echo e(old('force_profit_amount', $trade->force_profit_amount)); ?>"
+                        placeholder="<?php echo e(__('Win Amount')); ?>"
+                        <?php if(($trade->result_mode ?? 'default') !== 'force_win' || $trade->status): ?> disabled <?php endif; ?>>
+                </div>
                 <?php if(!$trade->status): ?>
                     <button type="submit" class="btn btn-sm btn-primary mt-2"><?php echo e(__('Save')); ?></button>
                 <?php endif; ?>

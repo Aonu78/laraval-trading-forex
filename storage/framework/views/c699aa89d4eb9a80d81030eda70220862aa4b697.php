@@ -131,6 +131,24 @@
 
 <?php $__env->startPush('script'); ?>
     <script>
+        function toggleTradeWinAmount(selectElement) {
+            const form = selectElement.closest('form');
+            if (!form) {
+                return;
+            }
+
+            const wrapper = form.querySelector('.trade-win-amount-wrapper');
+            const input = form.querySelector('input[name="force_profit_amount"]');
+
+            if (!wrapper || !input) {
+                return;
+            }
+
+            const shouldShow = selectElement.value === 'force_win';
+            wrapper.classList.toggle('d-none', !shouldShow);
+            input.disabled = !shouldShow || selectElement.disabled;
+        }
+
         $(function() {
             'use strict'
 

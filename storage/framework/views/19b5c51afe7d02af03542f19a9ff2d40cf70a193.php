@@ -408,4 +408,4 @@
     </script>
 <?php $__env->stopPush(); ?>
 
-<?php echo $__env->make('backend.layout.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\p\Downloads\Compressed\signal_v5\main\resources\views/backend/setting/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('backend.layout.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\laraval-trading-forex\resources\views/backend/setting/index.blade.php ENDPATH**/ ?>

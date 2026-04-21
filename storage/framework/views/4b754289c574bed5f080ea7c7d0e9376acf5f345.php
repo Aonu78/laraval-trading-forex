@@ -61,4 +61,4 @@
         </div>
     </div>
 </form>
-<?php /**PATH C:\Users\p\Downloads\Compressed\signal_v5\main\resources\views/backend/setting/preference.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\xampp\htdocs\laraval-trading-forex\resources\views/backend/setting/preference.blade.php ENDPATH**/ ?>
