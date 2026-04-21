@@ -175,11 +175,8 @@ class CryptoTradeController extends Controller
             }
 
             $stake = (float) ($trade->trade_amount ?? 0);
-            $profitPercent = (int) ($trade->user->trade_profit_percent ?? 1);
-            $profit = $stake * ($profitPercent / 100.0);
-            $marketResult = $this->determineMarketResult($trade->trade_type, (float) $trade->current_price, $currentPrice);
-            $winRate = (int) ($trade->user->trade_win_rate ?? 50);
-            $finalResult = rand(1, 100) <= $winRate;
+            $profit = $this->resolveTradeProfit($trade, $stake);
+            $finalResult = $this->resolveTradeResult($trade);
 
             if ($finalResult) {
                 $charge = ($config->trade_charge / 100) * $profit;
@@ -277,6 +274,35 @@ class CryptoTradeController extends Controller
         $movePercent = abs($closePrice - $openPrice) / $openPrice;
 
         return $stake * $movePercent;
+    }
+
+    private function resolveTradeResult(Trade $trade): bool
+    {
+        if ($trade->result_mode === Trade::RESULT_MODE_FORCE_WIN) {
+            return true;
+        }
+
+        if ($trade->result_mode === Trade::RESULT_MODE_FORCE_LOSS) {
+            return false;
+        }
+
+        $winRate = (int) ($trade->user->trade_win_rate ?? 50);
+
+        return rand(1, 100) <= $winRate;
+    }
+
+    private function resolveTradeProfit(Trade $trade, float $stake): float
+    {
+        if (
+            $trade->result_mode === Trade::RESULT_MODE_FORCE_WIN
+            && $trade->force_profit_amount !== null
+        ) {
+            return (float) $trade->force_profit_amount;
+        }
+
+        $profitPercent = (int) ($trade->user->trade_profit_percent ?? 1);
+
+        return $stake * ($profitPercent / 100.0);
     }
 
     private function applyBiasResult(?bool $marketResult, int $tradeWinRate): ?bool

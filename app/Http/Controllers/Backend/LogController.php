@@ -42,6 +42,26 @@ class LogController extends Controller
         return view('backend.logs.trade_log')->with($data);
     }
 
+    public function updateTradeResultMode(Request $request, Trade $trade)
+    {
+        $request->validate([
+            'result_mode' => 'required|in:default,force_win,force_loss',
+            'force_profit_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        if ($trade->status) {
+            return back()->with('error', 'Completed trades cannot be changed');
+        }
+
+        $trade->result_mode = $request->result_mode;
+        $trade->force_profit_amount = $request->result_mode === Trade::RESULT_MODE_FORCE_WIN
+            ? $request->force_profit_amount
+            : null;
+        $trade->save();
+
+        return back()->with('success', 'Trade result mode updated successfully');
+    }
+
 
     public function transaction(Request $request)
     {

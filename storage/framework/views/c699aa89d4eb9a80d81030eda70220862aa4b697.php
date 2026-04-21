@@ -39,70 +39,14 @@
                                     <th><?php echo e(__('Trade Type')); ?></th>
                                     <th><?php echo e(__('Trade Close At')); ?></th>
                                     <th><?php echo e(__('Profit/Loss')); ?></th>
+                                    <th><?php echo e(__('Result Mode')); ?></th>
+                                    <th><?php echo e(__('Win Amount')); ?></th>
                                     <th><?php echo e(__('Status')); ?></th>
                                 </tr>
                             </thead>
 
                             <tbody id="filter_data">
-                                <?php $__empty_1 = true; $__currentLoopData = $trades; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $trade): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                                    <tr>
-                                        <td><?php echo e(strtoupper($trade->ref)); ?></td>
-                                        <td>
-
-                                            <a href="<?php echo e(route('admin.user.details', $trade->user->id)); ?>">
-                                                <img src="<?php echo e(Config::getFile('user', $trade->user->image, true)); ?>"
-                                                    alt="" class="image-table">
-                                                <span>
-                                                    <?php echo e($trade->user->username); ?>
-
-                                                </span>
-                                            </a>
-                                        </td>
-                                        <td><?php echo e($trade->currency); ?></td>
-                                        <td><?php echo e(Config::formatter($trade->current_price)); ?></td>
-
-                                        <td>
-                                            <?php if($trade->trade_type == 'buy'): ?>
-                                                <i class="fas fa-arrow-alt-circle-up text-success"></i>
-                                                <?php echo e($trade->trade_type); ?>
-
-                                            <?php else: ?>
-                                                <i class="fas fa-arrow-alt-circle-down text-danger"></i>
-                                                <?php echo e($trade->trade_type); ?>
-
-                                            <?php endif; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php echo e($trade->trade_stop_at); ?>
-
-                                        </td>
-
-                                        <td>
-                                            <?php if($trade->profit_type == '+'): ?>
-                                                <span class="text-success font-weight-bolder"><?php echo e(__('+' . $trade->profit_amount)); ?></span>
-                                            <?php elseif($trade->profit_type == '-'): ?>
-                                                <span class="text-danger font-weight-bolder"><?php echo e(__('-' . $trade->loss_amount)); ?></span>
-                                            <?php endif; ?>
-                                        </td>
-
-                                        <td>
-                                            <?php if($trade->status): ?>
-                                                <span class="text-success "><i class="far fa-check-circle font-weight-bolder"></i></span>
-                                            <?php else: ?>
-                                                <span class="text-danger "><i class="fas fa-spinner fa-spin font-weight-bolder"></i></span>
-                                            <?php endif; ?>
-                                        </td>
-
-                                    </tr>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                    <tr>
-                                        <td class="text-center" colspan="100%">
-                                            <?php echo e(__('No Trades Found')); ?>
-
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
+                                <?php echo $__env->make('backend.logs._trade_rows', ['trades' => $trades], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                             </tbody>
 
                         </table>

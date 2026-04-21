@@ -269,6 +269,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('transfer/log', [LogController::class, 'transferLog'])->name('transfer.report');
             Route::get('commision/{user?}', [LogController::class, 'Commision'])->name('commision');
             Route::get('trade-log/{user?}', [LogController::class, 'tradeLog'])->name('trade');
+            Route::post('trade-log/{trade}/result-mode', [LogController::class, 'updateTradeResultMode'])->name('trade.result-mode');
         });
 
 
