@@ -1,0 +1,31 @@
+groww
+black theme
+crisp
+Auto trade in user profile, 1st win, 
+create a freeez payment, if active then all win trade payment will go to freeze balance, 
+if account freez then con't withdraw
+cradit scrore -> 100 -> chnage the profile score
+level in user side and admin, as VIP1..,
+withdraw
+	currency
+	Account HOder nmae
+	Bank_name
+	bank account number
+	IFSC code
+	
+wait for 10 to 20 minits
+
+widtdraw request in admin will be editable (Notification page to send user direct message)
+Notification page to send user direct message
+on KYC page is submitted then  
+
+Coin
+	bts (usdt)
+	eth (usdt)
+	bts (usdc)
+	bts 
+	eth (usdc)
+
+
+	
+	
