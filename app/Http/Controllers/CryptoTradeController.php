@@ -8,6 +8,7 @@ use App\Models\Trade;
 use App\Models\Transaction;
 use App\Notifications\TradeCreatedNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class CryptoTradeController extends Controller
@@ -34,22 +35,48 @@ class CryptoTradeController extends Controller
     {
         $general = Helper::config();
         $curl = curl_init();
+        $url = "https://min-api.cryptocompare.com/data/v2/histominute?fsym={$request->currency}&tsym=USD&limit=40&api_key=" . $general->crypto_api;
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => "https://min-api.cryptocompare.com/data/v2/histominute?fsym={$request->currency}&tsym=USD&limit=40&api_key=" . $general->crypto_api,
+            CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
+            CURLOPT_TIMEOUT => 15,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
         ));
 
         $response = curl_exec($curl);
+        $curlError = curl_error($curl);
+        $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        if ($response === false) {
+            Log::error('Trade latestTicker request failed', [
+                'currency' => $request->currency,
+                'url' => $url,
+                'curl_error' => $curlError,
+                'http_code' => $statusCode,
+            ]);
+            curl_close($curl);
+
+            return response()->json([]);
+        }
 
         $result = json_decode($response);
 
+        if (!isset($result->Data->Data) || !is_array($result->Data->Data)) {
+            Log::warning('Trade latestTicker returned unexpected payload', [
+                'currency' => $request->currency,
+                'url' => $url,
+                'http_code' => $statusCode,
+                'response' => $response,
+            ]);
+            curl_close($curl);
+
+            return response()->json([]);
+        }
 
         $hvoc = $result->Data->Data;
 
@@ -69,17 +96,31 @@ class CryptoTradeController extends Controller
 
     public function currentPrice(Request $request)
     {
-
         $general = Helper::config();
+        $url = "https://min-api.cryptocompare.com/data/price?fsym={$request->currency}&tsyms=USD&api_key=" . $general->crypto_api;
 
-        $currency = $request->currency;
+        try {
+            $data = json_decode(file_get_contents($url), true);
+            $result = is_array($data) ? reset($data) : null;
 
-        $data = json_decode(file_get_contents("https://min-api.cryptocompare.com/data/price?fsym={$request->currency}&tsyms=USD&api_key=" . $general->crypto_api), true);
+            if (!is_numeric($result)) {
+                Log::warning('Trade currentPrice returned invalid data', [
+                    'currency' => $request->currency,
+                    'url' => $url,
+                    'response' => $data,
+                ]);
+            }
 
+            return response()->json($result);
+        } catch (\Throwable $exception) {
+            Log::error('Trade currentPrice request failed', [
+                'currency' => $request->currency,
+                'url' => $url,
+                'message' => $exception->getMessage(),
+            ]);
 
-        $result = reset($data);
-
-        return response()->json($result);
+            return response()->json(null, 500);
+        }
     }
 
     public function trades()
@@ -94,6 +135,11 @@ class CryptoTradeController extends Controller
 
     public function openTrade(Request $request)
     {
+        Log::info('Trade open requested', [
+            'user_id' => auth()->id(),
+            'payload' => $request->only(['trade_cur', 'trade_price', 'trade_amount', 'type', 'duration']),
+        ]);
+
         $request->validate([
             "trade_cur" => "required",
             "trade_price" => "required",
@@ -105,18 +151,29 @@ class CryptoTradeController extends Controller
         $user = auth()->user();
 
         if ($user->trades->count() >= Helper::config()->trade_limit) {
+            Log::warning('Trade open blocked by daily limit', [
+                'user_id' => $user->id,
+                'trade_count' => $user->trades->count(),
+                'trade_limit' => Helper::config()->trade_limit,
+            ]);
             return redirect()->back()->with('error', 'Per Day Trading Limit expired');
         }
 
-        if ($user->payments->count() <= 0) {
-            return redirect()->back()->with('error', 'You need to subscribe a plan to trade');
-        }
-
         if ($request->trade_amount < Helper::config()->min_trade_balance) {
+            Log::warning('Trade open blocked by minimum trade balance', [
+                'user_id' => $user->id,
+                'trade_amount' => $request->trade_amount,
+                'minimum_trade_balance' => Helper::config()->min_trade_balance,
+            ]);
             return redirect()->back()->with('error', 'Minimum trade amount is ' . Helper::formatter(Helper::config()->min_trade_balance));
         }
 
         if ($user->balance < $request->trade_amount) {
+            Log::warning('Trade open blocked by insufficient balance', [
+                'user_id' => $user->id,
+                'user_balance' => $user->balance,
+                'trade_amount' => $request->trade_amount,
+            ]);
             return redirect()->back()->with('error', 'Insufficient balance for this trade amount');
         }
 
@@ -124,23 +181,48 @@ class CryptoTradeController extends Controller
         $durationInSeconds = $request->duration * 60;
 
         $ref = Str::random(16);
-
-        $trade = Trade::create([
+        $tradePayload = [
             'ref' => $ref,
             'user_id' => auth()->id(),
             'currency' => $request->trade_cur,
             'current_price' => $request->trade_price,
             'trade_amount' => $request->trade_amount,
             'trade_type' => $request->type,
-            'duration' => $durationInSeconds, // store seconds
-            'trade_stop_at' => now()->addSeconds($durationInSeconds), // correct
+            'duration' => $durationInSeconds,
+            'trade_stop_at' => now()->addSeconds($durationInSeconds),
             'trade_opens_at' => now()
-        ]);
+        ];
 
-        $admin = Admin::where('type', 'super')->first();
+        try {
+            $trade = Trade::create($tradePayload);
+            Log::info('Trade created successfully', [
+                'user_id' => $user->id,
+                'trade_id' => $trade->id,
+                'ref' => $trade->ref,
+                'payload' => $tradePayload,
+            ]);
+        } catch (\Throwable $exception) {
+            Log::error('Trade creation failed', [
+                'user_id' => $user->id,
+                'payload' => $tradePayload,
+                'message' => $exception->getMessage(),
+            ]);
 
-        if ($admin) {
-            $admin->notify(new TradeCreatedNotification($trade));
+            return redirect()->back()->with('error', 'Trade open failed. Check server log.');
+        }
+
+        try {
+            $admin = Admin::where('type', 'super')->first();
+
+            if ($admin) {
+                $admin->notify(new TradeCreatedNotification($trade));
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Trade notification failed', [
+                'user_id' => $user->id,
+                'trade_id' => $trade->id,
+                'message' => $exception->getMessage(),
+            ]);
         }
 
         return redirect()->back()->with('success', 'Trade Open Successfully');
@@ -148,6 +230,10 @@ class CryptoTradeController extends Controller
 
     public function tradeClose()
     {
+        Log::info('Manual trade close requested', [
+            'user_id' => auth()->id(),
+        ]);
+
         $trades = Trade::where('user_id', auth()->id())->where('status', 0)->get();
         $this->settleTrades($trades);
     }
@@ -155,6 +241,10 @@ class CryptoTradeController extends Controller
 
     public function tradingInterest()
     {
+        Log::info('Trading interest settlement started', [
+            'open_trades_count' => Trade::where('status', 0)->count(),
+        ]);
+
         $trades = Trade::where('status', 0)->get();
         $this->settleTrades($trades);
     }
@@ -171,6 +261,11 @@ class CryptoTradeController extends Controller
             $currentPrice = $this->fetchCurrentPrice($trade->currency, $config->crypto_api);
 
             if ($currentPrice === null) {
+                Log::warning('Trade settlement skipped because current price is unavailable', [
+                    'trade_id' => $trade->id,
+                    'ref' => $trade->ref,
+                    'currency' => $trade->currency,
+                ]);
                 continue;
             }
 
@@ -215,6 +310,17 @@ class CryptoTradeController extends Controller
                 'type' => $type,
                 'user_id' => $trade->user->id
             ]);
+
+            Log::info('Trade settled successfully', [
+                'trade_id' => $trade->id,
+                'ref' => $trade->ref,
+                'user_id' => $trade->user->id,
+                'result' => $type,
+                'profit' => $trade->profit_amount,
+                'loss' => $trade->loss_amount,
+                'charge' => $charge,
+                'current_price' => $currentPrice,
+            ]);
         }
     }
 
@@ -239,14 +345,31 @@ class CryptoTradeController extends Controller
 
     private function fetchCurrentPrice(string $currency, string $apiKey): ?float
     {
-        $data = json_decode(file_get_contents("https://min-api.cryptocompare.com/data/price?fsym={$currency}&tsyms=USD&api_key={$apiKey}"), true);
-        $price = reset($data);
+        $url = "https://min-api.cryptocompare.com/data/price?fsym={$currency}&tsyms=USD&api_key={$apiKey}";
 
-        if (! is_numeric($price)) {
+        try {
+            $data = json_decode(file_get_contents($url), true);
+            $price = is_array($data) ? reset($data) : null;
+
+            if (! is_numeric($price)) {
+                Log::warning('Trade fetchCurrentPrice returned invalid payload', [
+                    'currency' => $currency,
+                    'url' => $url,
+                    'response' => $data,
+                ]);
+                return null;
+            }
+
+            return (float) $price;
+        } catch (\Throwable $exception) {
+            Log::error('Trade fetchCurrentPrice failed', [
+                'currency' => $currency,
+                'url' => $url,
+                'message' => $exception->getMessage(),
+            ]);
+
             return null;
         }
-
-        return (float) $price;
     }
 
     private function determineMarketResult(string $tradeType, float $openPrice, float $closePrice): ?bool
