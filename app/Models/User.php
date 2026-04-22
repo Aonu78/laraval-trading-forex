@@ -15,7 +15,8 @@ class User extends Authenticatable
         'kyc_information' => 'array',
         'trade_win_rate' => 'integer',
         'trade_profit_percent' => 'integer',
-        'is_banned' => 'boolean'
+        'is_banned' => 'boolean',
+        'is_account_freeze' => 'boolean'
     ];
 
 

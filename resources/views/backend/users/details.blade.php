@@ -125,6 +125,12 @@
                         </div>
 
                         <div class="col-md-12 mb-3">
+                            <div class="alert alert-warning mb-0">
+                                {{ __('When account freeze is active, all winning trade returns go to the freeze balance and the user cannot withdraw.') }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
                             <div class="row">
                                 <div class="col-xl-3 col-6 mb-2">
                                     <div class="custom-control custom-switch">
@@ -158,6 +164,14 @@
                                             for="useCheck4">{{ __('Status') }}</label>
                                     </div>
                                 </div>
+                                <div class="col-xl-3 col-6 mb-2">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" name="account_freeze_status" {{ $user->is_account_freeze ? 'checked' : '' }}
+                                            class="custom-control-input" id="useCheck5">
+                                        <label class="custom-control-label"
+                                            for="useCheck5">{{ __('Account Freeze') }}</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -180,6 +194,11 @@
                 <div class="text-center mt-3">
                     <div>{{ __('Total Balance') }}</div>
                     <h2 class="mb-0 mt-1 sp_d_user_balance"> {{ Config::formatter($user->balance)}}</h2>
+                    <div class="mt-3">{{ __('Freeze Balance') }}</div>
+                    <h4 class="mb-0 mt-1">{{ Config::formatter($user->freeze_balance) }}</h4>
+                    <span class="badge {{ $user->is_account_freeze ? 'badge-danger' : 'badge-success' }} mt-3">
+                        {{ $user->is_account_freeze ? __('Freeze Active') : __('Freeze Inactive') }}
+                    </span>
                 </div>
 
                 @php
@@ -212,15 +231,21 @@
                 </div>
 
                 <div class="sp_balance_btns mt-4">
-                    <button type="button" id="addBtn" class="btn btn-sm py-2 btn-success">{{ __('Add Balance') }}</button>
-                    <button type="button" id="subBtn" class="btn btn-sm py-2 btn-danger">{{ __('Subtract Balance') }}</button>
+                    <button type="button" id="addBtn" class="btn btn-sm py-2 btn-success js-balance-toggle" data-target="#addBalance">{{ __('Add Balance') }}</button>
+                    <button type="button" id="subBtn" class="btn btn-sm py-2 btn-danger js-balance-toggle" data-target="#subBalance">{{ __('Subtract Balance') }}</button>
                 </div>
 
-                <form action="{{ route('admin.user.balance.update', $user->id) }}" method="post" id="addBalance" class="mt-3">
+                <div class="sp_balance_btns mt-2">
+                    <button type="button" class="btn btn-sm py-2 btn-info js-balance-toggle" data-target="#addFreezeBalance">{{ __('Add Freeze Balance') }}</button>
+                    <button type="button" class="btn btn-sm py-2 btn-warning js-balance-toggle" data-target="#subFreezeBalance">{{ __('Subtract Freeze Balance') }}</button>
+                </div>
+
+                <form action="{{ route('admin.user.balance.update', $user->id) }}" method="post" id="addBalance" class="mt-3 js-balance-form">
                     @csrf
                     <div class="input-group mb-3">
                         <input type="hidden" class="form-control" name="user_id" value="{{ $user->id }}">
                         <input type="hidden" class="form-control" name="type" value="add">
+                        <input type="hidden" class="form-control" name="wallet" value="balance">
                         <input type="number" class="form-control" name="balance" min="1"
                             placeholder="add balance">
                         <button class="btn btn-primary" type="submit">
@@ -228,14 +253,41 @@
                         </button>
                     </div>
                 </form>
-                <form action="{{ route('admin.user.balance.update', $user->id) }}" method="post" id="subBalance" class="mt-3">
+                <form action="{{ route('admin.user.balance.update', $user->id) }}" method="post" id="subBalance" class="mt-3 js-balance-form">
                     @csrf
                     <div class="input-group mb-3">
                         <input type="hidden" class="form-control" name="user_id" value="{{ $user->id }}">
                         <input type="hidden" class="form-control" name="type" value="minus">
+                        <input type="hidden" class="form-control" name="wallet" value="balance">
                         <input type="number" class="form-control" name="balance" min="1"
                             placeholder="Subtract Balance">
                         <button class="btn btn-danger" type="submit">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </form>
+                <form action="{{ route('admin.user.balance.update', $user->id) }}" method="post" id="addFreezeBalance" class="mt-3 js-balance-form">
+                    @csrf
+                    <div class="input-group mb-3">
+                        <input type="hidden" class="form-control" name="user_id" value="{{ $user->id }}">
+                        <input type="hidden" class="form-control" name="type" value="add">
+                        <input type="hidden" class="form-control" name="wallet" value="freeze_balance">
+                        <input type="number" class="form-control" name="balance" min="1"
+                            placeholder="Add Freeze Balance">
+                        <button class="btn btn-info text-white" type="submit">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                </form>
+                <form action="{{ route('admin.user.balance.update', $user->id) }}" method="post" id="subFreezeBalance" class="mt-3 js-balance-form">
+                    @csrf
+                    <div class="input-group mb-3">
+                        <input type="hidden" class="form-control" name="user_id" value="{{ $user->id }}">
+                        <input type="hidden" class="form-control" name="type" value="minus">
+                        <input type="hidden" class="form-control" name="wallet" value="freeze_balance">
+                        <input type="number" class="form-control" name="balance" min="1"
+                            placeholder="Subtract Freeze Balance">
+                        <button class="btn btn-warning text-white" type="submit">
                             <i class="fa fa-minus"></i>
                         </button>
                     </div>
@@ -425,6 +477,7 @@
                     <div class="modal-body">
                         <input type="hidden" class="form-control" name="user_id" value="{{ $user->id }}">
                         <input type="hidden" class="form-control" name="type" value="">
+                        <input type="hidden" class="form-control" name="wallet" value="">
                         <input type="hidden" class="form-control" name="balance" value="">
                         <p>{{ __('Are you sure to perform this action') }} ?</p>
                     </div>
@@ -553,31 +606,17 @@
         $(function() {
             'use strict'
 
-            let addBalance = $("#addBalance");
-            let subBalance = $("#subBalance");
+            const balanceForms = $('.js-balance-form');
 
-            addBalance.addClass('d-none');
-            subBalance.addClass('d-none');
+            balanceForms.addClass('d-none');
 
-            $("#addBtn").on('click', function(){
-                addBalance.toggleClass('d-none');
-                if(subBalance.hasClass('d-none')) {
-                    return true;
-                } else {
-                    subBalance.addClass('d-none');
-                }
+            $('.js-balance-toggle').on('click', function() {
+                const target = $($(this).data('target'));
+                balanceForms.not(target).addClass('d-none');
+                target.toggleClass('d-none');
             });
 
-            $("#subBtn").on('click', function(){
-                subBalance.toggleClass('d-none');
-                if(addBalance.hasClass('d-none')) {
-                    return true;
-                } else {
-                    addBalance.addClass('d-none');
-                }
-            });
-            
-            $('#addBalance').on('submit', function(e) {
+            balanceForms.on('submit', function(e) {
                 e.preventDefault();
 
                 let formData = $(this).serializeArray();
@@ -585,28 +624,12 @@
                 const modal = $('#confirmation');
 
                 modal.find('input[name=type]').val(formData[2].value)
-                modal.find('input[name=balance]').val(formData[3].value)
+                modal.find('input[name=wallet]').val(formData[3].value)
+                modal.find('input[name=balance]').val(formData[4].value)
 
                 modal.find('form').attr('action', $(this).attr('action'))
 
                 modal.modal('show')
-            })
-
-
-            $('#subBalance').on('submit', function(e) {
-                e.preventDefault();
-
-                let formData = $(this).serializeArray();
-
-                const modal = $('#confirmation');
-
-                modal.find('input[name=type]').val(formData[2].value)
-                modal.find('input[name=balance]').val(formData[3].value)
-
-                modal.find('form').attr('action', $(this).attr('action'))
-
-                modal.modal('show')
-
             })
 
             $('.sendMail').on('click', function(e) {

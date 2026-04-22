@@ -9,8 +9,16 @@
                         {{ __('Current Balance: ') }} <span
                             class="color-change">{{ Config::formatter(auth()->user()->balance, 2) }}</span>
                     </h4>
+                    <p class="mb-0 mt-2">
+                        {{ __('Freeze Balance: ') }} <span class="color-change">{{ Config::formatter(auth()->user()->freeze_balance, 2) }}</span>
+                    </p>
                 </div>
                 <div class="card-body">
+                    @if (auth()->user()->is_account_freeze)
+                        <div class="alert alert-danger">
+                            {{ __('Your account is frozen. You cannot request a withdrawal right now.') }}
+                        </div>
+                    @endif
                     <form action="" method="post">
                         @csrf
 
@@ -55,6 +63,12 @@
                     $('.instruction').text('');
                     return;
                 }
+
+                @if (auth()->user()->is_account_freeze)
+                    $('.appendData').addClass('d-none');
+                    return;
+                @endif
+
                 $('.appendData').removeClass('d-none');
                 getData($('select[name=method] option:selected').data('url'))
             })
@@ -133,7 +147,7 @@
                                 </div>
 
                                 <div class="col-md-12 mt-2">
-                                   <button class="btn sp_theme_btn w-100" type="submit">{{ __('Withdraw Now') }}</button>
+                                   <button class="btn sp_theme_btn w-100" type="submit" {{ auth()->user()->is_account_freeze ? 'disabled' : '' }}>{{ __('Withdraw Now') }}</button>
                                 </div>
                    `;
 

@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Configuration;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -28,6 +27,7 @@ class AdminUserService
         $user->is_kyc_verified = $request->kyc_status == 'on' ? 1 : 0;
         $user->trade_win_rate = $request->trade_win_rate;
         $user->trade_profit_percent = $request->trade_profit_percent;
+        $user->is_account_freeze = $request->account_freeze_status == 'on' ? 1 : 0;
 
         $user->save();
 
@@ -39,15 +39,20 @@ class AdminUserService
     {
         $user = User::findOrFail($request->user_id);
 
-        $general = Configuration::first();
+        $walletColumn = in_array($request->wallet, ['balance', 'freeze_balance'], true)
+            ? $request->wallet
+            : 'balance';
+
+        $balanceLabel = $walletColumn === 'freeze_balance' ? 'Freeze Balance' : 'Balance';
 
         if ($request->type == 'add') {
-            $user->balance =  $user->balance + $request->balance;
+            $user->{$walletColumn} = $user->{$walletColumn} + $request->balance;
         } else {
-            if ($user->balance < $request->balance) {
+            if ($user->{$walletColumn} < $request->balance) {
                 return ['type' => 'error', 'message' => 'Insufficient balance'];
             }
-            $user->balance =  $user->balance - $request->balance;
+
+            $user->{$walletColumn} = $user->{$walletColumn} - $request->balance;
         }
 
         $user->save();
@@ -59,11 +64,13 @@ class AdminUserService
             'user_id' => $user->id,
             'amount' => $request->balance,
             'charge' => 0,
-            'details' => $request->type === 'add' ? 'Balance Added By Admin' : 'Balance Subtruct By Admin',
+            'details' => $request->type === 'add'
+                ? $balanceLabel . ' Added By Admin'
+                : $balanceLabel . ' Subtract By Admin',
             'type' => $request->type === 'add' ? '+' : '-'
         ]);
 
 
-        return ['type' => 'success', 'message' => 'Successfully ' . $request->type . ' balance'];
+        return ['type' => 'success', 'message' => 'Successfully ' . $request->type . ' ' . strtolower($balanceLabel)];
     }
 }

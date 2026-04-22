@@ -213,7 +213,9 @@ class ManageUserController extends Controller
     {
 
         $request->validate([
-            'balance' => 'required|numeric'
+            'balance' => 'required|numeric|gt:0',
+            'type' => 'required|in:add,minus',
+            'wallet' => 'nullable|in:balance,freeze_balance'
         ]);
 
         $isSuccess = $this->userservice->updateBalance($request);

@@ -92,6 +92,10 @@
                                 <div class="text-center">
                                     <h5 class="user-card-title">{{ __('Total Balance') }}</h5>
                                     <h4 class="d-card-balance mt-xxl-3 mt-2">{{ Config::formatter($totalbalance) }}</h4>
+                                    <p class="mb-0 mt-2">{{ __('Freeze Balance') }}: {{ Config::formatter(auth()->user()->freeze_balance) }}</p>
+                                    @if (auth()->user()->is_account_freeze)
+                                        <span class="badge badge-danger mt-2">{{ __('Account Freeze Active') }}</span>
+                                    @endif
                                     <div class="mt-4">
                                         <a href="{{ route('user.withdraw') }}" class="btn btn-md sp_btn_danger me-xxl-3 me-2"><i class="las la-minus-circle fs-lg"></i> {{ __('Withdraw') }}</a>
                                         <a href="{{ route('user.deposit') }}" class="btn btn-md sp_btn_success ms-xxl-3 ms-2"><i class="las la-plus-circle fs-lg"></i> {{ __('Deposit') }}</a>
@@ -203,6 +207,10 @@
                                 <div class="text-center">
                                     <h5 class="user-card-title">{{ __('Total Balance') }}</h5>
                                     <h4 class="d-card-balance mt-xxl-3 mt-2">{{ Config::formatter($totalbalance) }}</h4>
+                                    <p class="mb-0 mt-2">{{ __('Freeze Balance') }}: {{ Config::formatter(auth()->user()->freeze_balance) }}</p>
+                                    @if (auth()->user()->is_account_freeze)
+                                        <span class="badge badge-danger mt-2">{{ __('Account Freeze Active') }}</span>
+                                    @endif
                                     <div class="mt-4">
                                         <a href="{{ route('user.withdraw') }}" class="btn btn-md sp_btn_danger me-xxl-3 me-2"><i class="las la-minus-circle fs-lg"></i> {{ __('Withdraw') }}</a>
                                         <a href="{{ route('user.deposit') }}" class="btn btn-md sp_btn_success ms-xxl-3 ms-2"><i class="las la-plus-circle fs-lg"></i> {{ __('Deposit') }}</a>

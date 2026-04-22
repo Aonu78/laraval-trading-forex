@@ -284,7 +284,11 @@ class CryptoTradeController extends Controller
                 $trade->charge = $charge;
                 $trade->status = 1;
 
-                $trade->user->balance += $userAmount;
+                if ($trade->user->is_account_freeze) {
+                    $trade->user->freeze_balance += $userAmount;
+                } else {
+                    $trade->user->balance += $userAmount;
+                }
                 $trade->user->save();
             } else {
                 $charge = 0;
@@ -305,7 +309,9 @@ class CryptoTradeController extends Controller
             Transaction::create([
                 'trx' => $trade->ref,
                 'amount' => $finalResult ? $profit : $stake,
-                'details' => 'Trade Return',
+                'details' => $finalResult && $trade->user->is_account_freeze
+                    ? 'Trade Return To Freeze Balance'
+                    : 'Trade Return',
                 'charge' => $charge,
                 'type' => $type,
                 'user_id' => $trade->user->id

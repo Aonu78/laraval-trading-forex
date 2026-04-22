@@ -14,8 +14,10 @@ class UserWithdrawService{
     
     public function makeWithdraw($request)
     {
+        if (auth()->user()->is_account_freeze) {
+            return ['type' => 'error', 'message' => 'Your account is frozen. Withdraw is not available right now'];
+        }
 
-       
         $general = Configuration::first();
 
         $withdraw = Withdraw::where('user_id', auth()->id())->whereDate('created_at', now())->count();
