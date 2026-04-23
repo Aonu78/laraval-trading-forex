@@ -30,7 +30,9 @@ class AdminUserRequest extends FormRequest
         return [
             'phone' => 'unique:users,phone,' . $user->id,
             'trade_win_rate' => 'required|integer|between:0,100',
-            'trade_profit_percent' => 'required|integer|between:0,100'
+            'trade_profit_percent' => 'required|integer|between:0,100',
+            'credit_score' => 'required|integer|min:0|max:100',
+            'level' => 'required|string|max:50'
         ];
     }
 }

@@ -77,6 +77,11 @@ class UserWithdrawService{
             'withdraw_charge' => $charge,
             'withdraw_amount' => $request->amount,
             'total' => $request->final_amo,
+            'currency' => $request->currency,
+            'account_holder_name' => $request->account_holder_name,
+            'bank_name' => $request->bank_name,
+            'bank_account_number' => $request->bank_account_number,
+            'ifsc_code' => $request->ifsc_code,
             'status' => 0
         ]);
 

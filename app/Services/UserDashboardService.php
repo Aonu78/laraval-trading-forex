@@ -107,44 +107,9 @@ class UserDashboardService
         $data['depositTotalAmount'] = $depositTotalAmount;
         $data['signalGrapTotal'] = $signalGrapTotal;
         $data['months'] = $months;
-        $data['profileHealth'] = $this->calculateProfileHealth($user);
+        $data['profileHealth'] = $user->credit_score ?? 100;
 
 
         return $data;
-    }
-
-    private function calculateProfileHealth($user): int
-    {
-        $address = (object) ($user->address ?? []);
-
-        $score = 0;
-
-        // Email verification = 30%
-        if ($user->is_email_verified) {
-            $score += 30;
-        }
-
-        // KYC verification = 40%
-        if ($user->is_kyc_verified) {
-            $score += 40;
-        }
-
-        // Remaining 30% fields (5% each)
-        $fields = [
-            $user->phone,
-            $user->image,
-            $address->country ?? null,
-            $address->city ?? null,
-            $address->state ?? null,
-            $address->zip ?? null,
-        ];
-
-        foreach ($fields as $field) {
-            if (!is_null($field) && trim((string)$field) !== '') {
-                $score += 5;
-            }
-        }
-
-        return min($score, 100);
     }
 }

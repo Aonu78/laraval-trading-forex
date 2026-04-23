@@ -22,7 +22,41 @@
                     <form action="" method="post">
                         @csrf
 
-                        <div class="form-group">
+@if(isset($hasPending) && $hasPending)
+    <div class="alert alert-warning mb-3">
+        {{ __('You have pending withdrawal request(s). Please wait 10-20 minutes for processing.') }}
+    </div>
+    <div class="table-responsive mb-4">
+        <h6 class="mb-2">Recent Pending Withdrawals:</h6>
+        <table class="table table-sm sp_site_table">
+            <thead>
+                <tr>
+                    <th>{{ __('Trx') }}</th>
+                    <th>{{ __('Date') }}</th>
+                    <th>{{ __('Method') }}</th>
+                    <th>{{ __('Getable Amount') }}</th>
+                    <th>{{ __('Status') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($pendingWithdraws->take(5) as $withdraw)
+                    <tr>
+                        <td>{{ $withdraw->trx }}</td>
+                        <td>{{ $withdraw->created_at->format('d M Y') }}</td>
+                        <td>{{ optional($withdraw->withdrawMethod)->name ?? 'N/A' }}</td>
+                        <td>{{ number_format($withdraw->total, 2) }}</td>
+                        <td><span class="badge badge-warning">{{ __('Pending') }}</span></td>
+                    </tr>
+                @empty
+                    <tr><td colspan="5" class="text-center">{{ __('No pending found') }}</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    <a href="{{ route('user.withdraw.pending') }}" class="btn btn-sm btn-outline-warning mb-3">{{ __('View All Pending') }}</a>
+@endif
+
+<div class="form-group">
                             <label for="">{{ __('Withdraw Method') }}</label>
                             <select name="method" id="" class="form-select">
                                 <option value="" selected>{{ __('Select Method') }}</option>
@@ -134,6 +168,31 @@
                                 <div class="col-md-12 mb-3">
                                     <label for="">{{ __('Account Email / Wallet Address') }} <span class="sp_text_danger">*</span></label>
                                     <input type="text" name="email" class="form-control" required>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="">{{ __('Currency') }}</label>
+                                    <input type="text" name="currency" class="form-control" placeholder="e.g., USD, INR">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="">{{ __('Account Holder Name') }}</label>
+                                    <input type="text" name="account_holder_name" class="form-control">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="">{{ __('Bank Name') }}</label>
+                                    <input type="text" name="bank_name" class="form-control">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="">{{ __('Bank Account Number') }}</label>
+                                    <input type="text" name="bank_account_number" class="form-control">
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="">{{ __('IFSC Code') }}</label>
+                                    <input type="text" name="ifsc_code" class="form-control">
                                 </div>
 
                                 <div class="col-md-12 mb-3">

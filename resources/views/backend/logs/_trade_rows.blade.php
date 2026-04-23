@@ -13,13 +13,8 @@
         <td>{{ Config::formatter($trade->current_price) }}</td>
 
         <td>
-            @if ($trade->trade_type == 'buy')
-                <i class="fas fa-arrow-alt-circle-up text-success"></i>
-                {{ $trade->trade_type }}
-            @else
-                <i class="fas fa-arrow-alt-circle-down text-danger"></i>
-                {{ $trade->trade_type }}
-            @endif
+            <i class="{{ $trade->trade_icon_class }}"></i>
+            {{ __($trade->trade_label) }}
         </td>
 
         <td>

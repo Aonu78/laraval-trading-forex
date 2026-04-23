@@ -54,6 +54,29 @@ class UserController extends Controller
         return view(Helper::theme() . 'user.changepassword', compact('title'));
     }
 
+    public function notifications()
+    {
+        $data['title'] = 'Notifications';
+        $data['notifications'] = auth()->user()->notifications()->latest()->paginate(Helper::pagination());
+
+        return view(Helper::theme() . 'user.notifications')->with($data);
+    }
+
+    public function markNotification($id)
+    {
+        $notification = auth()->user()->notifications()->where('id', $id)->firstOrFail();
+        $notification->markAsRead();
+
+        return back()->with('success', 'Notification marked as read');
+    }
+
+    public function markAllNotifications()
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+
+        return back()->with('success', 'All notifications marked as read');
+    }
+
     public function updatePassword(Request $request)
     {
         $request->validate([

@@ -56,18 +56,29 @@
                         </li>
 
 
-                        <li>
-                            <a class="{{ request()->query('kycNotifications') ? 'active' : '' }}" data-toggle="tab"
-                                href="#kyc">
+	                        <li>
+	                            <a class="{{ request()->query('kycNotifications') ? 'active' : '' }}" data-toggle="tab"
+	                                href="#kyc">
                                 <span class="text-uppercase">
                                     <i class="las la-cookie-bite"></i>
                                     {{ __('KYC Notifications') }}
-                                </span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+	                                </span>
+	                            </a>
+	                        </li>
+	                        @can('manage-user')
+	                            <li>
+	                                <a class="{{ request()->query('userNotifications') ? 'active' : '' }}" data-toggle="tab"
+	                                    href="#user-notification">
+	                                    <span class="text-uppercase">
+	                                        <i class="las la-paper-plane"></i>
+	                                        {{ __('Send User Notification') }}
+	                                    </span>
+	                                </a>
+	                            </li>
+	                        @endcan
+	                    </ul>
+	                </div>
+	            </div>
 
 
             <div class="tab-content tabcontent-border">
@@ -295,8 +306,8 @@
                 </div>
 
 
-                <div class="tab-pane fade {{ request()->query('kycNotifications') ? 'show active' : '' }}" id="kyc"
-                    role="tabpanel">
+	                <div class="tab-pane fade {{ request()->query('kycNotifications') ? 'show active' : '' }}" id="kyc"
+	                    role="tabpanel">
                     <div class="card">
                         <div class="card-body">
                             <div class="pt-4">
@@ -333,12 +344,67 @@
                                     @endif
 
 
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	                @can('manage-user')
+	                    <div class="tab-pane fade {{ request()->query('userNotifications') ? 'show active' : '' }}"
+	                        id="user-notification" role="tabpanel">
+	                        <div class="card">
+	                            <div class="card-body">
+	                                <form action="" method="post" id="userNotificationForm">
+	                                    @csrf
+	                                    <div class="row">
+	                                        <div class="col-md-6">
+	                                            <div class="form-group">
+	                                                <label>{{ __('User') }}</label>
+	                                                <select name="user_id" class="form-control" id="userNotificationSelect" required>
+	                                                    <option value="">{{ __('Select User') }}</option>
+	                                                    @foreach ($users as $user)
+	                                                        <option value="{{ $user->id }}">
+	                                                            {{ $user->username }} ({{ $user->email }})
+	                                                        </option>
+	                                                    @endforeach
+	                                                </select>
+	                                            </div>
+	                                        </div>
+	                                        <div class="col-md-6">
+	                                            <div class="form-group">
+	                                                <label>{{ __('Title') }}</label>
+	                                                <input type="text" name="title" class="form-control" required>
+	                                            </div>
+	                                        </div>
+	                                        <div class="col-md-12">
+	                                            <div class="form-group">
+	                                                <label>{{ __('Redirect URL') }}</label>
+	                                                <input type="url" name="url" class="form-control"
+	                                                    placeholder="{{ route('user.notifications') }}">
+	                                                <small class="text-muted">
+	                                                    {{ __('Leave empty to open the user notification page') }}
+	                                                </small>
+	                                            </div>
+	                                        </div>
+	                                        <div class="col-md-12">
+	                                            <div class="form-group mb-0">
+	                                                <label>{{ __('Message') }}</label>
+	                                                <textarea name="message" rows="6" class="form-control" required></textarea>
+	                                            </div>
+	                                        </div>
+	                                    </div>
+	                                    <div class="mt-4">
+	                                        <button type="submit" class="btn btn-primary">
+	                                            <i class="las la-paper-plane"></i>
+	                                            {{ __('Send Notification') }}
+	                                        </button>
+	                                    </div>
+	                                </form>
+	                            </div>
+	                        </div>
+	                    </div>
+	                @endcan
+	            </div>
+	        </div>
+	    </div>
         </div>
     </div>
 @endsection
@@ -450,10 +516,22 @@
 
 @push('script')
     <script>
-        $(function() {
-            'use strict'
+	        $(function() {
+	            'use strict'
 
-            $('.check').on('change', function() {
+	            $('#userNotificationSelect').on('change', function() {
+	                const userId = $(this).val();
+
+	                if (!userId) {
+	                    $('#userNotificationForm').attr('action', '');
+	                    return;
+	                }
+
+	                const action = "{{ url('admin/users/notification') }}/" + userId;
+	                $('#userNotificationForm').attr('action', action);
+	            });
+
+	            $('.check').on('change', function() {
                 $.ajax({
                     url: $(this).data('url'),
                     method: "POST",

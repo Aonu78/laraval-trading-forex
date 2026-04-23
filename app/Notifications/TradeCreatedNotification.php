@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Helpers\Helper\Helper;
+use App\Models\Trade;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -43,7 +44,7 @@ class TradeCreatedNotification extends Notification
     {
         return [
             'user_id' => $this->trade->user_id,
-            'message' => $this->trade->user->username . ' opened a ' . strtoupper($this->trade->trade_type) . ' trade on ' . $this->trade->currency . ' with amount ' . Helper::formatter($this->trade->trade_amount ?? 0),
+            'message' => $this->trade->user->username . ' opened a ' . Trade::tradeLabelFromType($this->trade->trade_type) . ' trade on ' . $this->trade->currency . ' with amount ' . Helper::formatter($this->trade->trade_amount ?? 0),
             'url' => route('admin.trade', $this->trade->user_id),
         ];
     }

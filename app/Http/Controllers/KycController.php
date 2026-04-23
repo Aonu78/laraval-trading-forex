@@ -14,10 +14,13 @@ class KycController extends Controller
 
     public function kyc()
     {
-        if (auth()->user()->kyc == 1) {
+        if ((int) auth()->user()->is_kyc_verified === 1) {
             return redirect()->route('user.dashboard')->with('success', 'Your Kyc Verification Successfull');
         }
+
         $data['title'] = 'Kyc Verification';
+        $data['kycStatus'] = (int) auth()->user()->is_kyc_verified;
+
         return view(Helper::theme(). 'user.kyc')->with($data);
     }
 
@@ -28,7 +31,11 @@ class KycController extends Controller
 
         $user = auth()->user();
 
-        if ($user->kyc == 2) {
+        if ((int) $user->is_kyc_verified === 1) {
+            return redirect()->route('user.dashboard')->with('success', 'Your Kyc Verification Successfull');
+        }
+
+        if ((int) $user->is_kyc_verified === 2) {
             return redirect()->back()->with('error', 'You have already submitted KYC form');
         }
 

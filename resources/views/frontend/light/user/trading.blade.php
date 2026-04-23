@@ -8,79 +8,79 @@
                     <div class="radio_button_list">
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-1" name="currency"
-                                value="BTC" checked>
+                                value="BTS_USDT" data-pair="BTS/USDT" checked>
                             <label class="form-check-label" for="trad-1">
-                                {{ __('BTC') }}
+                                {{ __('BTS (USDT)') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-2" name="currency"
-                                value="ETH">
+                                value="ETH_USDT" data-pair="ETH/USDT">
                             <label class="form-check-label" for="trad-2">
-                                {{ __('ETH') }}
+                                {{ __('ETH (USDT)') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-3" name="currency"
-                                value="USDT">
+                                value="BTS_USDC" data-pair="BTS/USDC">
                             <label class="form-check-label" for="trad-3">
-                                {{ __('USDT') }}
+                                {{ __('BTS (USDC)') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-4" name="currency"
-                                value="BNB">
+                                value="BTS" data-pair="BTS">
                             <label class="form-check-label" for="trad-4">
-                                {{ __('BNB') }}
+                                {{ __('BTS') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-5" name="currency"
-                                value="DOGE">
+                                value="ETH_USDC" data-pair="ETH/USDC">
                             <label class="form-check-label" for="trad-5">
-                                {{ __('DOGE') }}
+                                {{ __('ETH (USDC)') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-6" name="currency"
-                                value="LTC">
+                                value="BTC" data-pair="BTC">
                             <label class="form-check-label" for="trad-6">
-                                {{ __('LTC') }}
+                                {{ __('BTC') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-7" name="currency"
-                                value="DASH">
+                                value="BNB" data-pair="BNB">
                             <label class="form-check-label" for="trad-7">
-                                {{ __('DASH') }}
+                                {{ __('BNB') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-8" name="currency"
-                                value="ETC">
+                                value="DOGE" data-pair="DOGE">
                             <label class="form-check-label" for="trad-8">
-                                {{ __('ETC') }}
+                                {{ __('DOGE') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-9" name="currency"
-                                value="BCH">
+                                value="LTC" data-pair="LTC">
                             <label class="form-check-label" for="trad-9">
-                                {{ __('BCH') }}
+                                {{ __('LTC') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-10" name="currency"
-                                value="XAUT">
+                                value="XAUT" data-pair="XAUT">
                             <label class="form-check-label" for="trad-10">
                                 XAUT
                             </label>
@@ -186,13 +186,8 @@
                                         <td>{{ Config::formatter($trade->trade_amount ?? 0) }}</td>
 
                                         <td>
-                                            @if ($trade->trade_type == 'buy')
-                                                <i class="fas fa-arrow-alt-circle-up text-success"></i>
-                                                {{ $trade->trade_type }}
-                                            @else
-                                                <i class="fas fa-arrow-alt-circle-down text-danger"></i>
-                                                {{ $trade->trade_type }}
-                                            @endif
+                                            <i class="{{ $trade->trade_icon_class }}"></i>
+                                            {{ __($trade->trade_label) }}
                                         </td>
 
                                         <td>
@@ -268,7 +263,7 @@
                             </div>
                             <div class="text-end">
                                 <div class="text-muted fs-12">{{ __('direction') }}</div>
-                                <div id="orderDirection" class="fw-bold text-success">{{ __('Buy more') }}</div>
+                                <div id="orderDirection" class="fw-bold text-success">{{ __('Buy Up') }}</div>
                             </div>
                         </div>
 
@@ -313,14 +308,26 @@
                         <div class="row mt-3">
                             <div class="col-auto">
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" id="trading-buy" type="radio" name="type" value="buy" checked>
-                                    <label class="form-check-label" for="trading-buy">{{ __('BUY') }}</label>
+                                    <input class="form-check-input" id="trading-buy-up" type="radio" name="type" value="buy_up" checked>
+                                    <label class="form-check-label" for="trading-buy-up">{{ __('BUY UP') }}</label>
                                 </div>
                             </div>
                             <div class="col-auto">
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" id="trading-sell" type="radio" name="type" value="sell">
-                                    <label class="form-check-label" for="trading-sell">{{ __('SELL') }}</label>
+                                    <input class="form-check-input" id="trading-buy-down" type="radio" name="type" value="buy_down">
+                                    <label class="form-check-label" for="trading-buy-down">{{ __('BUY DOWN') }}</label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" id="trading-sell-up" type="radio" name="type" value="sell_up">
+                                    <label class="form-check-label" for="trading-sell-up">{{ __('SELL UP') }}</label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" id="trading-sell-down" type="radio" name="type" value="sell_down">
+                                    <label class="form-check-label" for="trading-sell-down">{{ __('SELL DOWN') }}</label>
                                 </div>
                             </div>
                         </div>
@@ -345,7 +352,7 @@
 
             <div class="text-start">
                 <p>Trading Pair <span id="c_pair" class="float-end">BTC/USDT</span></p>
-                <p>Direction <span id="c_type" class="float-end text-success">Buy</span></p>
+                <p>Direction <span id="c_type" class="float-end text-success">Buy Up</span></p>
                 <p>Buy Price <span id="c_price" class="float-end"></span></p>
                 <p>Amount <span id="c_amount" class="float-end"></span></p>
             </div>
@@ -492,15 +499,10 @@ function showTradeConfirmModal() {
     $('#c_price').text(lastTradeData.price);
     $('#c_amount').text(lastTradeData.amount);
 
-    if (lastTradeData.type === 'buy') {
-        $('#c_type').text('Buy more')
-            .removeClass('text-danger')
-            .addClass('text-success');
-    } else {
-        $('#c_type').text('Sell more')
-            .removeClass('text-success')
-            .addClass('text-danger');
-    }
+    const tradeMeta = getTradeMeta(lastTradeData.type);
+    $('#c_type').text(tradeMeta.label)
+        .removeClass('text-success text-danger')
+        .addClass(tradeMeta.direction === 'up' ? 'text-success' : 'text-danger');
 
     $('#tradeConfirm').modal('show');
 }
@@ -605,6 +607,10 @@ $('#tradeCircle').on('click', function () {
             })
         })
 
+        function selectedPairLabel() {
+            return $("input[name='currency']:checked").data('pair') || currency;
+        }
+
         function currentPrice(currency) {
 
             $.ajax({
@@ -614,7 +620,7 @@ $('#tradeCircle').on('click', function () {
                     currency: currency
                 },
                 success: function(response) {
-                    $('#currentPrice').text(response + ' (' + currency + ')')
+                    $('#currentPrice').text(response + ' (' + selectedPairLabel() + ')')
                     $('input[name=trade_cur]').val(currency)
                     $('input[name=trade_price]').val(response)
                 }
@@ -707,12 +713,28 @@ $('#tradeCircle').on('click', function () {
 
         const orderBalance = parseFloat('{{ auth()->user()->balance }}') || 0;
 
+        function getTradeMeta(type) {
+            const normalized = ({
+                buy: 'buy_up',
+                sell: 'sell_down'
+            })[type] || type;
+
+            const map = {
+                buy_up: { label: '{{ __('Buy Up') }}', direction: 'up' },
+                buy_down: { label: '{{ __('Buy Down') }}', direction: 'down' },
+                sell_up: { label: '{{ __('Sell Up') }}', direction: 'up' },
+                sell_down: { label: '{{ __('Sell Down') }}', direction: 'down' }
+            };
+
+            return map[normalized] || { label: normalized, direction: 'up' };
+        }
+
         function updateOrderDirection() {
             const direction = $('input[name="type"]:checked').val();
-            const directionText = direction === 'sell' ? '{{ __('Sell more') }}' : '{{ __('Buy more') }}';
-            $('#orderDirection').text(directionText);
-            $('#orderDirection').toggleClass('text-success', direction === 'buy');
-            $('#orderDirection').toggleClass('text-danger', direction === 'sell');
+            const tradeMeta = getTradeMeta(direction);
+            $('#orderDirection').text(tradeMeta.label);
+            $('#orderDirection').toggleClass('text-success', tradeMeta.direction === 'up');
+            $('#orderDirection').toggleClass('text-danger', tradeMeta.direction === 'down');
         }
 
         function updateOrderExpiry(seconds) {
@@ -732,8 +754,8 @@ $('#tradeCircle').on('click', function () {
             $('.btn-amount').removeClass('active');
         }
 
-        function updateOrderPair(currency) {
-            $('#orderPair').text(currency + '/USDT');
+        function updateOrderPair() {
+            $('#orderPair').text(selectedPairLabel());
         }
 
         $('.btn-expiry').on('click', function() {
@@ -751,13 +773,12 @@ $('#tradeCircle').on('click', function () {
         $('input[name="type"]').on('change', updateOrderDirection);
 
         $('.order').on('click', function() {
-            const selectedCurrency = $("input[name='currency']:checked").val();
-            updateOrderPair(selectedCurrency);
+            updateOrderPair();
             updateOrderDirection();
             updateOrderExpiry(60);
             $('#tradeAmountInput').val('');
             $('.btn-amount').removeClass('active');
-            currentPrice(selectedCurrency);
+            currentPrice($("input[name='currency']:checked").val());
 
             $('#order').modal('show');
         });

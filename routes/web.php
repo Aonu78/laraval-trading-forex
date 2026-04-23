@@ -95,6 +95,9 @@ Route::name('user.')->group(function () {
             Route::post('profile/setting', [UserController::class, 'profileUpdate'])->name('profileupdate');
             Route::get('profile/change/password', [UserController::class, 'changePassword'])->name('change.password');
             Route::post('profile/change/password', [UserController::class, 'updatePassword'])->name('update.password');
+            Route::get('notifications', [UserController::class, 'notifications'])->name('notifications');
+            Route::post('notifications/mark-all', [UserController::class, 'markAllNotifications'])->name('notifications.mark-all');
+            Route::post('notifications/{id}/mark-read', [UserController::class, 'markNotification'])->name('notifications.mark-read');
 
             // signal
 

@@ -5,16 +5,18 @@ namespace App\Models;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Searchable;
+    use HasFactory, Notifiable, Searchable;
 
     protected $casts = [
         'address' => 'object',
         'kyc_information' => 'array',
         'trade_win_rate' => 'integer',
         'trade_profit_percent' => 'integer',
+        'credit_score' => 'integer',
         'is_banned' => 'boolean',
         'is_account_freeze' => 'boolean'
     ];

@@ -73,19 +73,37 @@
                                                 <span class="badge badge-warning">{{ __('Pending') }}</span>
                                             @endif
                                         </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary details"
-                                                data-user_data="{{ json_encode($withdrawlog->proof) }}"
-                                                data-transaction="{{ $withdrawlog->trx }}"
-                                                data-provider="{{ $withdrawlog->user->username }}"
-                                                data-email="{{ $withdrawlog->user->email }}"
-                                                data-method_name="{{ $withdrawlog->withdrawMethod->name }}"
-                                                data-date="{{ __($withdrawlog->created_at->format('d F Y')) }}"><i
-                                                    class="fas fa-eye"></i></button>
-                                            @if ($withdrawlog->status == 0)
-                                                <button class="btn btn-sm btn-outline-success accept"
-                                                    data-url="{{ route('admin.withdraw.accept', $withdrawlog) }}"><i
-                                                        class="fas fa-check"></i></button>
+	                                        <td>
+	                                            <button class="btn btn-sm btn-outline-primary details"
+	                                                data-user_data="{{ json_encode($withdrawlog->proof) }}"
+	                                                data-transaction="{{ $withdrawlog->trx }}"
+	                                                data-provider="{{ $withdrawlog->user->username }}"
+	                                                data-email="{{ $withdrawlog->user->email }}"
+	                                                data-method_name="{{ $withdrawlog->withdrawMethod->name }}"
+	                                                data-withdraw_method_id="{{ $withdrawlog->withdraw_method_id }}"
+	                                                data-withdraw_amount="{{ $withdrawlog->withdraw_amount }}"
+	                                                data-currency="{{ $withdrawlog->currency }}"
+	                                                data-account_holder_name="{{ $withdrawlog->account_holder_name }}"
+	                                                data-bank_name="{{ $withdrawlog->bank_name }}"
+	                                                data-bank_account_number="{{ $withdrawlog->bank_account_number }}"
+	                                                data-ifsc_code="{{ $withdrawlog->ifsc_code }}"
+	                                                data-date="{{ __($withdrawlog->created_at->format('d F Y')) }}"><i
+	                                                    class="fas fa-eye"></i></button>
+	                                            @if ($withdrawlog->status == 0)
+	                                                <button class="btn btn-sm btn-outline-info edit-request"
+	                                                    data-url="{{ route('admin.withdraw.request.update', $withdrawlog) }}"
+	                                                    data-user_data="{{ json_encode($withdrawlog->proof) }}"
+	                                                    data-withdraw_method_id="{{ $withdrawlog->withdraw_method_id }}"
+	                                                    data-withdraw_amount="{{ $withdrawlog->withdraw_amount }}"
+	                                                    data-currency="{{ $withdrawlog->currency }}"
+	                                                    data-account_holder_name="{{ $withdrawlog->account_holder_name }}"
+	                                                    data-bank_name="{{ $withdrawlog->bank_name }}"
+	                                                    data-bank_account_number="{{ $withdrawlog->bank_account_number }}"
+	                                                    data-ifsc_code="{{ $withdrawlog->ifsc_code }}"><i
+	                                                        class="fas fa-edit"></i></button>
+	                                                <button class="btn btn-sm btn-outline-success accept"
+	                                                    data-url="{{ route('admin.withdraw.accept', $withdrawlog) }}"><i
+	                                                        class="fas fa-check"></i></button>
                                                 <button class="btn btn-sm btn-outline-danger reject"
                                                     data-url="{{ route('admin.withdraw.reject', $withdrawlog) }}"><i
                                                         class="fas fa-times"></i></button>
@@ -166,7 +184,7 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="reject" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+	    <div class="modal fade" id="reject" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
 
             <form action="" method="post">
@@ -197,7 +215,97 @@
                 </div>
             </form>
         </div>
-    </div>
+	    </div>
+
+	    <div class="modal fade" id="editRequest" tabindex="-1" role="dialog" aria-hidden="true">
+	        <div class="modal-dialog modal-lg" role="document">
+	            <form action="" method="post">
+	                @csrf
+	                <div class="modal-content">
+	                    <div class="modal-header">
+	                        <h5 class="modal-title">{{ __('Edit Withdraw Request') }}</h5>
+	                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                            <span aria-hidden="true">&times;</span>
+	                        </button>
+	                    </div>
+	                    <div class="modal-body">
+	                        <div class="row">
+	                            <div class="col-md-6">
+	                                <div class="form-group">
+	                                    <label>{{ __('Withdraw Method') }}</label>
+	                                    <select name="withdraw_method_id" class="form-control" required>
+	                                        @foreach (\App\Models\WithdrawGateway::where('status', 1)->orderBy('name')->get() as $method)
+	                                            <option value="{{ $method->id }}">{{ $method->name }}</option>
+	                                        @endforeach
+	                                    </select>
+	                                </div>
+	                            </div>
+	                            <div class="col-md-6">
+	                                <div class="form-group">
+	                                    <label>{{ __('Withdraw Amount') }}</label>
+	                                    <input type="number" step="0.00000001" min="0" name="withdraw_amount"
+	                                        class="form-control" required>
+	                                </div>
+	                            </div>
+	                            <div class="col-md-6">
+	                                <div class="form-group">
+	                                    <label>{{ __('Currency') }}</label>
+	                                    <input type="text" name="currency" class="form-control">
+	                                </div>
+	                            </div>
+	                            <div class="col-md-6">
+	                                <div class="form-group">
+	                                    <label>{{ __('Proof Email') }}</label>
+	                                    <input type="text" name="proof_email" class="form-control">
+	                                </div>
+	                            </div>
+	                            <div class="col-md-6">
+	                                <div class="form-group">
+	                                    <label>{{ __('Account Holder Name') }}</label>
+	                                    <input type="text" name="account_holder_name" class="form-control">
+	                                </div>
+	                            </div>
+	                            <div class="col-md-6">
+	                                <div class="form-group">
+	                                    <label>{{ __('Bank Name') }}</label>
+	                                    <input type="text" name="bank_name" class="form-control">
+	                                </div>
+	                            </div>
+	                            <div class="col-md-6">
+	                                <div class="form-group">
+	                                    <label>{{ __('Bank Account Number') }}</label>
+	                                    <input type="text" name="bank_account_number" class="form-control">
+	                                </div>
+	                            </div>
+	                            <div class="col-md-6">
+	                                <div class="form-group">
+	                                    <label>{{ __('IFSC / Swift Code') }}</label>
+	                                    <input type="text" name="ifsc_code" class="form-control">
+	                                </div>
+	                            </div>
+	                            <div class="col-md-12">
+	                                <div class="form-group">
+	                                    <label>{{ __('Account Information') }}</label>
+	                                    <textarea name="account_information" rows="3" class="form-control"></textarea>
+	                                </div>
+	                            </div>
+	                            <div class="col-md-12">
+	                                <div class="form-group mb-0">
+	                                    <label>{{ __('Note') }}</label>
+	                                    <textarea name="note" rows="3" class="form-control"></textarea>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="modal-footer">
+	                        <button type="button" class="btn btn-secondary"
+	                            data-dismiss="modal">{{ __('Close') }}</button>
+	                        <button type="submit" class="btn btn-info">{{ __('Update Request') }}</button>
+	                    </div>
+	                </div>
+	            </form>
+	        </div>
+	    </div>
 @endsection
 
 
@@ -266,15 +374,33 @@
                 modal.modal('show');
             })
 
-            $(document).on('click', '.reject' ,function() {
-                const modal = $('#reject');
+	            $(document).on('click', '.reject' ,function() {
+	                const modal = $('#reject');
 
-                modal.find('form').attr('action', $(this).data('url'));
-                modal.modal('show');
-            })
+	                modal.find('form').attr('action', $(this).data('url'));
+	                modal.modal('show');
+	            })
 
-        })
-    </script>
+	            $(document).on('click', '.edit-request', function() {
+	                const modal = $('#editRequest');
+	                const userData = $(this).data('user_data') || {};
+
+	                modal.find('form').attr('action', $(this).data('url'));
+	                modal.find('select[name=withdraw_method_id]').val($(this).data('withdraw_method_id'));
+	                modal.find('input[name=withdraw_amount]').val($(this).data('withdraw_amount'));
+	                modal.find('input[name=currency]').val($(this).data('currency'));
+	                modal.find('input[name=proof_email]').val(userData.email || '');
+	                modal.find('input[name=account_holder_name]').val($(this).data('account_holder_name'));
+	                modal.find('input[name=bank_name]').val($(this).data('bank_name'));
+	                modal.find('input[name=bank_account_number]').val($(this).data('bank_account_number'));
+	                modal.find('input[name=ifsc_code]').val($(this).data('ifsc_code'));
+	                modal.find('textarea[name=account_information]').val(userData.account_information || '');
+	                modal.find('textarea[name=note]').val(userData.note || '');
+	                modal.modal('show');
+	            })
+
+	        })
+	    </script>
 @endpush
 
 

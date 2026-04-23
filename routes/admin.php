@@ -112,6 +112,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update/{user}', [ManageUserController::class, 'userUpdate'])->name('update');
             Route::post('balance/{user}', [ManageUserController::class, 'userBalanceUpdate'])->name('balance.update');
             Route::post('mail/{user}', [ManageUserController::class, 'sendUserMail'])->name('mail');
+            Route::post('notification/{user}', [ManageUserController::class, 'sendDirectNotification'])->name('notification');
             Route::get('{status}', [ManageUserController::class, 'userStatusWiseFilter'])->name('filter');
             Route::get('interest/log', [ManageUserController::class, 'interestLog'])->name('interestlog');
 
@@ -209,6 +210,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::get('withdraw-log/{id}', [ManageWithdrawController::class, 'withdrawLog'])->name('log');
             Route::get('{status?}', [ManageWithdrawController::class, 'filterWithdraw'])->name('filter');
+            Route::post('request/{withdraw}', [ManageWithdrawController::class, 'withdrawRequestUpdate'])->name('request.update');
             Route::post('accept/{withdraw}', [ManageWithdrawController::class, 'withdrawAccept'])->name('accept');
             Route::post('reject/{withdraw}', [ManageWithdrawController::class, 'withdrawReject'])->name('reject');
         });

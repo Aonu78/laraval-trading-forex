@@ -27,7 +27,12 @@ class UserWithdrawRequest extends FormRequest
             'method' => 'required|integer',
             'amount' => 'required|numeric',
             'final_amo' => 'required|numeric',
-            'email' => 'required'
+            'email' => 'required',
+            'currency' => 'nullable|string',
+            'account_holder_name' => 'nullable|string',
+            'bank_name' => 'nullable|string',
+            'bank_account_number' => 'nullable|string',
+            'ifsc_code' => 'nullable|string'
         ];
     }
 }

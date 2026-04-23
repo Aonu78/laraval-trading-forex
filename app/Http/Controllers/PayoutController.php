@@ -23,7 +23,11 @@ class PayoutController extends Controller
     {
         $data['title'] = 'Withdraw Money';
 
-        $data['withdraws'] = WithdrawGateway::where('status', 1)->latest()->get();
+$data['withdraws'] = WithdrawGateway::where('status', 1)->latest()->get();
+
+        $pendingWithdraws = \App\Models\Withdraw::where('user_id', auth()->id())->where('status', 0)->latest()->get();
+        $data['hasPending'] = $pendingWithdraws->count() > 0;
+        $data['pendingWithdraws'] = $pendingWithdraws;
 
         return view(Helper::theme() . 'user.withdraw.index')->with($data);
     }

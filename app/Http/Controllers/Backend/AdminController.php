@@ -8,6 +8,7 @@ use App\Jobs\SendEmailJob;
 use App\Jobs\SendSubscriberEmail;
 use App\Jobs\SendSubscriberMail;
 use App\Models\Admin;
+use App\Models\User;
 use App\Models\Subscriber;
 use App\Models\Template;
 use App\Notifications\DepositNotification;
@@ -126,6 +127,7 @@ class AdminController extends Controller
         $data['ticketNotifications'] = auth()->guard('admin')->user()->unreadNotifications()->where('type', TicketNotification::class)->paginate(Helper::pagination(), ['*'], 'ticketNotifications');
 
         $data['kycNotifications'] = auth()->guard('admin')->user()->unreadNotifications()->where('type', KycUpdateNotification::class)->paginate(Helper::pagination(), ['*'], 'kycNotifications');
+        $data['users'] = User::select('id', 'username', 'email')->orderBy('username')->get();
 
         $data['title'] = 'Notications';
 

@@ -136,6 +136,75 @@ class WithdrawService
         return ['type' => 'success', 'message' => 'Withdraw Accepted Successfully'];
     }
 
+    public function updateRequest($withdraw, $request)
+    {
+        if ((int) $withdraw->status !== 0) {
+            return ['type' => 'error', 'message' => 'Only pending withdraw requests can be edited'];
+        }
+
+        $method = WithdrawGateway::findOrFail($request->withdraw_method_id);
+
+        if (($request->withdraw_amount < $method->min_withdraw_amount) || ($request->withdraw_amount > $method->max_withdraw_amount)) {
+            return ['type' => 'error', 'message' => 'Please follow the withdraw limits'];
+        }
+
+        if ($method->type == 'percent') {
+            $charge = ($method->charge * $request->withdraw_amount) / 100;
+        } else {
+            $charge = $method->charge;
+        }
+
+        $total = $request->withdraw_amount - $charge;
+
+        if ($total < 0) {
+            return ['type' => 'error', 'message' => 'Withdraw total can not be negative'];
+        }
+
+        try {
+            DB::transaction(function () use ($withdraw, $request, $method, $charge, $total) {
+                $amountDifference = $request->withdraw_amount - $withdraw->withdraw_amount;
+
+                $user = $withdraw->user()->lockForUpdate()->first();
+
+                if ($amountDifference > 0 && $user->balance < $amountDifference) {
+                    throw new \Exception('User does not have enough available balance for this increase');
+                }
+
+                if ($amountDifference != 0) {
+                    $user->balance = $user->balance - $amountDifference;
+                    $user->save();
+                }
+
+                $proof = is_array($withdraw->proof) ? $withdraw->proof : [];
+                $proof['email'] = $request->proof_email;
+                $proof['account_information'] = $request->account_information;
+                $proof['note'] = $request->note;
+
+                $withdraw->update([
+                    'withdraw_method_id' => $method->id,
+                    'withdraw_amount' => $request->withdraw_amount,
+                    'withdraw_charge' => $charge,
+                    'total' => $total,
+                    'proof' => $proof,
+                    'currency' => $request->currency,
+                    'account_holder_name' => $request->account_holder_name,
+                    'bank_name' => $request->bank_name,
+                    'bank_account_number' => $request->bank_account_number,
+                    'ifsc_code' => $request->ifsc_code,
+                ]);
+
+                Transaction::where('trx', $withdraw->trx)->where('user_id', $withdraw->user_id)->update([
+                    'amount' => $request->withdraw_amount,
+                    'charge' => $charge,
+                ]);
+            });
+        } catch (\Exception $exception) {
+            return ['type' => 'error', 'message' => $exception->getMessage()];
+        }
+
+        return ['type' => 'success', 'message' => 'Withdraw request updated successfully'];
+    }
+
 
     public function reject($withdraw, $request)
     {

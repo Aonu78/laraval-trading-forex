@@ -14,6 +14,7 @@ use App\Models\Template;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Withdraw;
+use App\Notifications\DirectUserNotification;
 use App\Services\AdminUserService;
 use Illuminate\Http\Request;
 use Auth;
@@ -77,8 +78,9 @@ class ManageUserController extends Controller
         $data['totalTicket'] = $data['user']->tickets->count();
 
         $data['title'] = "User Details";
-        $data['profileHealth'] = $this->calculateProfileHealth($data['user']);
-        
+        // $data['profileHealth'] = $this->calculateProfileHealth($data['user']);
+        $data['profileHealth'] = $data['user']->credit_score ?? 100;
+
 
         return view('backend.users.details')->with($data);
     }
@@ -147,6 +149,24 @@ class ManageUserController extends Controller
        
 
         return back()->with('success', 'Send Email To user Successfully');
+    }
+
+    public function sendDirectNotification(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'message' => 'required|string',
+            'url' => 'nullable|url|max:255',
+        ]);
+
+        $user->notify(new DirectUserNotification([
+            'title' => $data['title'],
+            'message' => $data['message'],
+            'url' => $data['url'] ?? route('user.notifications'),
+            'sent_by' => optional(auth()->guard('admin')->user())->username ?? 'admin',
+        ]));
+
+        return back()->with('success', 'Notification sent to user successfully');
     }
 
     public function disabled(Request $request)

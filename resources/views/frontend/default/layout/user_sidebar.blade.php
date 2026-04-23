@@ -45,8 +45,15 @@
         <li class="{{ Config::singleMenu('user.deposit') }}"><a href="{{ route('user.deposit') }}"><i
                     class="fas fa-credit-card"></i>{{ __('Deposit Now') }}</a></li>
 
-        <li class="{{ Config::singleMenu('user.withdraw') }}"><a href="{{ route('user.withdraw') }}"><i
-                    class="fas fa-hand-holding-usd"></i> {{ __('Withdraw') }}</a></li>
+	        <li class="{{ Config::singleMenu('user.withdraw') }}"><a href="{{ route('user.withdraw') }}"><i
+	                    class="fas fa-hand-holding-usd"></i> {{ __('Withdraw') }}</a></li>
+
+	        <li class="{{ Config::singleMenu('user.notifications') }}"><a href="{{ route('user.notifications') }}"><i
+	                    class="fas fa-bell"></i> {{ __('Notifications') }}
+	                @if (auth()->user()->unreadNotifications()->count() > 0)
+	                    <span class="noti-count">{{ auth()->user()->unreadNotifications()->count() }}</span>
+	                @endif
+	            </a></li>
 
         {{-- <li class="{{ Config::singleMenu('user.transfer_money') }}"><a href="{{ route('user.transfer_money') }}"><i
                     class="fas fa-exchange-alt"></i> {{ __('Transfer Money') }}</a></li> --}}
@@ -126,14 +133,21 @@
             </a>
         </li>
 
-        <li>
-            <a href="{{ route('user.withdraw') }}" class="{{ Config::activeMenu(route('user.withdraw')) }}">
-                <i class="fas fa-hand-holding-usd"></i>
-                <span>{{ __('Withdraw') }}</span>
-            </a>
-        </li>
+	        <li>
+	            <a href="{{ route('user.withdraw') }}" class="{{ Config::activeMenu(route('user.withdraw')) }}">
+	                <i class="fas fa-hand-holding-usd"></i>
+	                <span>{{ __('Withdraw') }}</span>
+	            </a>
+	        </li>
 
-        <li class="sidebar-open-btn">
+	        <li>
+	            <a href="{{ route('user.notifications') }}" class="{{ Config::activeMenu(route('user.notifications')) }}">
+	                <i class="fas fa-bell"></i>
+	                <span>{{ __('Alerts') }}</span>
+	            </a>
+	        </li>
+
+	        <li class="sidebar-open-btn">
             <a href="#0" class="">
                 <i class="fas fa-bars"></i>
                 <span>{{ __('Menu') }}</span>

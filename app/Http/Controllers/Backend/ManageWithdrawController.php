@@ -92,6 +92,30 @@ class ManageWithdrawController extends Controller
             return redirect()->back()->with('success', $isSuccess['message']);
     }
 
+    public function withdrawRequestUpdate(Request $request, Withdraw $withdraw)
+    {
+        $request->validate([
+            'withdraw_method_id' => 'required|exists:withdraw_gateways,id',
+            'withdraw_amount' => 'required|numeric|gt:0',
+            'currency' => 'nullable|string|max:50',
+            'account_holder_name' => 'nullable|string|max:255',
+            'bank_name' => 'nullable|string|max:255',
+            'bank_account_number' => 'nullable|string|max:255',
+            'ifsc_code' => 'nullable|string|max:255',
+            'proof_email' => 'nullable|string|max:255',
+            'account_information' => 'nullable|string|max:500',
+            'note' => 'nullable|string|max:1000',
+        ]);
+
+        $isSuccess = $this->gateway->updateRequest($withdraw, $request);
+
+        if ($isSuccess['type'] === 'error') {
+            return redirect()->back()->with('error', $isSuccess['message']);
+        }
+
+        return redirect()->back()->with('success', $isSuccess['message']);
+    }
+
     public function withdrawLog(Request $request, $id)
     {
         $isSuccess = $this->gateway->log($request, $id);

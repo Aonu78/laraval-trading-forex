@@ -43,8 +43,16 @@
         <li class="<?php echo e(Config::singleMenu('user.deposit')); ?>"><a href="<?php echo e(route('user.deposit')); ?>"><i
                     class="fas fa-credit-card"></i><?php echo e(__('Deposit Now')); ?></a></li>
 
-        <li class="<?php echo e(Config::singleMenu('user.withdraw')); ?>"><a href="<?php echo e(route('user.withdraw')); ?>"><i
-                    class="fas fa-hand-holding-usd"></i> <?php echo e(__('Withdraw')); ?></a></li>
+	        <li class="<?php echo e(Config::singleMenu('user.withdraw')); ?>"><a href="<?php echo e(route('user.withdraw')); ?>"><i
+	                    class="fas fa-hand-holding-usd"></i> <?php echo e(__('Withdraw')); ?></a></li>
+
+	        <li class="<?php echo e(Config::singleMenu('user.notifications')); ?>"><a href="<?php echo e(route('user.notifications')); ?>"><i
+	                    class="fas fa-bell"></i> <?php echo e(__('Notifications')); ?>
+
+	                <?php if(auth()->user()->unreadNotifications()->count() > 0): ?>
+	                    <span class="noti-count"><?php echo e(auth()->user()->unreadNotifications()->count()); ?></span>
+	                <?php endif; ?>
+	            </a></li>
 
         
 
@@ -108,14 +116,21 @@
             </a>
         </li>
 
-        <li>
-            <a href="<?php echo e(route('user.withdraw')); ?>" class="<?php echo e(Config::activeMenu(route('user.withdraw'))); ?>">
-                <i class="fas fa-hand-holding-usd"></i>
-                <span><?php echo e(__('Withdraw')); ?></span>
-            </a>
-        </li>
+	        <li>
+	            <a href="<?php echo e(route('user.withdraw')); ?>" class="<?php echo e(Config::activeMenu(route('user.withdraw'))); ?>">
+	                <i class="fas fa-hand-holding-usd"></i>
+	                <span><?php echo e(__('Withdraw')); ?></span>
+	            </a>
+	        </li>
 
-        <li class="sidebar-open-btn">
+	        <li>
+	            <a href="<?php echo e(route('user.notifications')); ?>" class="<?php echo e(Config::activeMenu(route('user.notifications'))); ?>">
+	                <i class="fas fa-bell"></i>
+	                <span><?php echo e(__('Alerts')); ?></span>
+	            </a>
+	        </li>
+
+	        <li class="sidebar-open-btn">
             <a href="#0" class="">
                 <i class="fas fa-bars"></i>
                 <span><?php echo e(__('Menu')); ?></span>

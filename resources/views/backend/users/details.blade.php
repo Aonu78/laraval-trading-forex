@@ -124,6 +124,18 @@
                                 max="100" value="{{ old('trade_profit_percent', $user->trade_profit_percent ?? 1) }}">
                         </div>
 
+                        <div class="col-md-6 mb-3">
+                            <label>{{ __('Credit Score') }}</label>
+                            <input type="number" name="credit_score" class="form-control form_control" min="0"
+                                max="100" value="{{ old('credit_score', $user->credit_score ?? 100) }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>{{ __('Level') }}</label>
+                            <input type="text" name="level" class="form-control form_control"
+                                value="{{ old('level', $user->level ?? 'VIP1') }}">
+                        </div>
+
                         <div class="col-md-12 mb-3">
                             <div class="alert alert-warning mb-0">
                                 {{ __('When account freeze is active, all winning trade returns go to the freeze balance and the user cannot withdraw.') }}
@@ -202,11 +214,12 @@
                 </div>
 
                 @php
-                    if ($profileHealth < 40) {
+                    $creditScore = $user->credit_score ?? 100;
+                    if ($creditScore < 40) {
                         $progressClass = 'bg-danger';
-                    } elseif ($profileHealth < 60) {
+                    } elseif ($creditScore < 60) {
                         $progressClass = 'bg-warning';
-                    } elseif ($profileHealth < 80) {
+                    } elseif ($creditScore < 80) {
                         $progressClass = 'bg-info';
                     } else {
                         $progressClass = 'bg-success';
@@ -215,15 +228,15 @@
 
                 <div class="mt-4">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <div>{{ __('Profile Health') }}</div>
-                        <strong>{{ $profileHealth }}%</strong>
+                        <div>{{ __('Credit Score') }}</div>
+                        <strong>{{ $creditScore }}%</strong>
                     </div>
 
                     <div class="progress" style="height: 8px;">
                         <div class="progress-bar {{ $progressClass }}"
                             role="progressbar"
-                            style="width: {{ $profileHealth }}%"
-                            aria-valuenow="{{ $profileHealth }}"
+                            style="width: {{ $creditScore }}%"
+                            aria-valuenow="{{ $creditScore }}"
                             aria-valuemin="0"
                             aria-valuemax="100">
                         </div>
@@ -296,15 +309,21 @@
             <div class="mt-4 p-4 bg-white rounded-lg">
                 <h4 class="mb-3">{{ __('Quick Links') }}</h4>
                 <ul class="user-action-list pb-2">
-                    <li>
-                        <a href="#" class="user-action-btn sendMail">
-                            <i class="fas fa-envelope mr-2"></i>
-                            {{ __('Send Email') }} 
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.user.login', $user->id) }}" target="_blank"
-                        class="user-action-btn">
+	                    <li>
+	                        <a href="#" class="user-action-btn sendMail">
+	                            <i class="fas fa-envelope mr-2"></i>
+	                            {{ __('Send Email') }} 
+	                        </a>
+	                    </li>
+	                    <li>
+	                        <a href="#" class="user-action-btn sendNotification">
+	                            <i class="fas fa-bell mr-2"></i>
+	                            {{ __('Send Notification') }}
+	                        </a>
+	                    </li>
+	                    <li>
+	                        <a href="{{ route('admin.user.login', $user->id) }}" target="_blank"
+	                        class="user-action-btn">
                             <i class="fas fa-user-alt mr-2"></i>
                             {{ __('Login As User') }}
                         </a>
@@ -431,7 +450,7 @@
     </div>
     
 
-    <div class="modal fade" tabindex="-1" role="dialog" id="mail">
+	    <div class="modal fade" tabindex="-1" role="dialog" id="mail">
         <div class="modal-dialog modal-lg" role="document">
             <form action="{{ route('admin.user.mail', $user->id) }}" method="post">
                 @csrf
@@ -441,7 +460,46 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                    </div>
+	    </div>
+
+	    <div class="modal fade" tabindex="-1" role="dialog" id="directNotification">
+	        <div class="modal-dialog modal-lg" role="document">
+	            <form action="{{ route('admin.user.notification', $user->id) }}" method="post">
+	                @csrf
+	                <div class="modal-content">
+	                    <div class="modal-header">
+	                        <h5 class="modal-title">{{ __('Send Notification to user') }}</h5>
+	                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                            <span aria-hidden="true">&times;</span>
+	                        </button>
+	                    </div>
+	                    <div class="modal-body">
+	                        <div class="form-group">
+	                            <label>{{ __('Title') }}</label>
+	                            <input type="text" name="title" class="form-control" required>
+	                        </div>
+	                        <div class="form-group">
+	                            <label>{{ __('Redirect URL') }}</label>
+	                            <input type="url" name="url" class="form-control"
+	                                placeholder="{{ route('user.notifications') }}">
+	                        </div>
+	                        <div class="form-group">
+	                            <label>{{ __('Message') }}</label>
+	                            <textarea name="message" cols="30" rows="8" class="form-control" required></textarea>
+	                        </div>
+	                    </div>
+	                    <div class="modal-footer">
+	                        <button type="button" class="btn btn-secondary text-dark"
+	                            data-dismiss="modal">{{ __('Close') }}</button>
+	                        <button type="submit" class="btn btn-primary">
+	                            <i class="las la-bell"></i>
+	                            {{ __('Send Notification') }}
+	                        </button>
+	                    </div>
+	                </div>
+	            </form>
+	        </div>
+	    </div>
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="">{{ __('Subject') }}</label>
@@ -632,13 +690,19 @@
                 modal.modal('show')
             })
 
-            $('.sendMail').on('click', function(e) {
-                e.preventDefault();
+	            $('.sendMail').on('click', function(e) {
+	                e.preventDefault();
 
-                const modal = $('#mail');
+	                const modal = $('#mail');
 
-                modal.modal('show');
-            })
-        })
-    </script>
-@endpush
+	                modal.modal('show');
+	            })
+
+	            $('.sendNotification').on('click', function(e) {
+	                e.preventDefault();
+
+	                $('#directNotification').modal('show');
+	            })
+	        })
+	    </script>
+	@endpush

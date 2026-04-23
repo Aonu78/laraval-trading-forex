@@ -8,79 +8,79 @@
                     <div class="radio_button_list">
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-1" name="currency"
-                                value="BTC" checked>
+                                value="BTS_USDT" data-pair="BTS/USDT" checked>
                             <label class="form-check-label" for="trad-1">
-                                {{ __('BTC') }}
+                                {{ __('BTS (USDT)') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-2" name="currency"
-                                value="ETH">
+                                value="ETH_USDT" data-pair="ETH/USDT">
                             <label class="form-check-label" for="trad-2">
-                                {{ __('ETH') }}
+                                {{ __('ETH (USDT)') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-3" name="currency"
-                                value="USDT">
+                                value="BTS_USDC" data-pair="BTS/USDC">
                             <label class="form-check-label" for="trad-3">
-                                {{ __('USDT') }}
+                                {{ __('BTS (USDC)') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-4" name="currency"
-                                value="BNB">
+                                value="BTS" data-pair="BTS">
                             <label class="form-check-label" for="trad-4">
-                                {{ __('BNB') }}
+                                {{ __('BTS') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-5" name="currency"
-                                value="DOGE">
+                                value="ETH_USDC" data-pair="ETH/USDC">
                             <label class="form-check-label" for="trad-5">
-                                {{ __('DOGE') }}
+                                {{ __('ETH (USDC)') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-6" name="currency"
-                                value="LTC">
+                                value="BTC" data-pair="BTC">
                             <label class="form-check-label" for="trad-6">
-                                {{ __('LTC') }}
+                                {{ __('BTC') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-7" name="currency"
-                                value="DASH">
+                                value="BNB" data-pair="BNB">
                             <label class="form-check-label" for="trad-7">
-                                {{ __('DASH') }}
+                                {{ __('BNB') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-8" name="currency"
-                                value="ETC">
+                                value="DOGE" data-pair="DOGE">
                             <label class="form-check-label" for="trad-8">
-                                {{ __('ETC') }}
+                                {{ __('DOGE') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-9" name="currency"
-                                value="BCH">
+                                value="LTC" data-pair="LTC">
                             <label class="form-check-label" for="trad-9">
-                                {{ __('BCH') }}
+                                {{ __('LTC') }}
                             </label>
                         </div>
 
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-10" name="currency"
-                                value="XAUT">
+                                value="XAUT" data-pair="XAUT">
                             <label class="form-check-label" for="trad-10">
                                 XAUT
                             </label>
@@ -186,13 +186,8 @@
                                         <td>{{ Config::formatter($trade->trade_amount ?? 0) }}</td>
 
                                         <td>
-                                            @if ($trade->trade_type == 'buy')
-                                                <i class="fas fa-arrow-alt-circle-up text-success"></i>
-                                                {{ $trade->trade_type }}
-                                            @else
-                                                <i class="fas fa-arrow-alt-circle-down text-danger"></i>
-                                                {{ $trade->trade_type }}
-                                            @endif
+                                            <i class="{{ $trade->trade_icon_class }}"></i>
+                                            {{ __($trade->trade_label) }}
                                         </td>
 
                                         <td>
@@ -278,19 +273,37 @@
                         <div class="row">
                             <div class="col-auto">
                                 <div class="sp_form_check">
-                                    <input class="form-check-input" id="trading-buy" type="radio" name="type"
-                                        value="buy" checked>
-                                    <label class="form-check-label" for="trading-buy">
-                                        {{ __('BUY') }}
+                                    <input class="form-check-input" id="trading-buy-up" type="radio" name="type"
+                                        value="buy_up" checked>
+                                    <label class="form-check-label" for="trading-buy-up">
+                                        {{ __('BUY UP') }}
                                     </label>
                                 </div>
                             </div>
                             <div class="col-auto">
                                 <div class="sp_form_check">
-                                    <input class="form-check-input" id="trading-sell" type="radio" name="type"
-                                        value="sell">
-                                    <label class="form-check-label" for="trading-sell">
-                                        {{ __('SELL') }}
+                                    <input class="form-check-input" id="trading-buy-down" type="radio" name="type"
+                                        value="buy_down">
+                                    <label class="form-check-label" for="trading-buy-down">
+                                        {{ __('BUY DOWN') }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="sp_form_check">
+                                    <input class="form-check-input" id="trading-sell-up" type="radio" name="type"
+                                        value="sell_up">
+                                    <label class="form-check-label" for="trading-sell-up">
+                                        {{ __('SELL UP') }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="sp_form_check">
+                                    <input class="form-check-input" id="trading-sell-down" type="radio" name="type"
+                                        value="sell_down">
+                                    <label class="form-check-label" for="trading-sell-down">
+                                        {{ __('SELL DOWN') }}
                                     </label>
                                 </div>
                             </div>
@@ -357,6 +370,10 @@
             })
         })
 
+        function selectedPairLabel() {
+            return $("input[name='currency']:checked").data('pair') || currency;
+        }
+
         function currentPrice(currency) {
 
             $.ajax({
@@ -366,7 +383,7 @@
                     currency: currency
                 },
                 success: function(response) {
-                    $('#currentPrice').text('Current Price ' + response + '(' + currency + ')')
+                    $('#currentPrice').text('Current Price ' + response + ' (' + selectedPairLabel() + ')')
                     $('input[name=trade_cur]').val(currency)
                     $('input[name=trade_price]').val(response)
                 }

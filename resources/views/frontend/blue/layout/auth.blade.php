@@ -69,6 +69,7 @@
                 aria-expanded="false">
                 <img src="{{ Config::getFile('user', auth()->user()->image, true) }}" alt="image">
                 <span>{{ auth()->user()->username }}</span>
+                <small class="text-muted d-block">{{ auth()->user()->level ?? 'VIP1' }}</small>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 <li><a class="dropdown-item" href="{{ route('user.profile') }}"><i class="far fa-user-circle me-2"></i>
