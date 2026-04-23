@@ -28,7 +28,7 @@
     </div>
     <div class="table-responsive mb-4">
         <h6 class="mb-2">Recent Pending Withdrawals:</h6>
-        <table class="table table-sm sp_site_table">
+        <table class="table table-sm">
             <thead>
                 <tr>
                     <th>{{ __('Trx') }}</th>
@@ -165,14 +165,16 @@
                                     <input type="text" name="final_amo" class="form-control final_amo" required readonly>
                                 </div>
 
-                                <div class="col-md-12 mb-3">
+                                <div class="col-md-12 mb-3 d-none">
                                     <label for="">{{ __('Account Email / Wallet Address') }} <span class="sp_text_danger">*</span></label>
-                                    <input type="text" name="email" class="form-control" required>
+                                    <input type="text" name="email" class="form-control" value="{{ auth()->user()->email }}" required>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
                                     <label for="">{{ __('Currency') }}</label>
-                                    <input type="text" name="currency" class="form-control" placeholder="e.g., USD, INR">
+                                    <select name="currency" class="form-select">
+                                        <option value="{{ Config::config()->currency }}" selected>{{ Config::config()->currency }}</option>
+                                    </select>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
@@ -195,15 +197,7 @@
                                     <input type="text" name="ifsc_code" class="form-control">
                                 </div>
 
-                                <div class="col-md-12 mb-3">
-                                    <label for="">{{ __('Account Information') }}</label>
-                                   <textarea class="form-control" name="account_information" row="5"></textarea>
-                                </div>
-
-                                <div class="col-md-12 mb-3">
-                                    <label for="">{{ __('Additional Note') }}</label>
-                                   <textarea class="form-control" name="note" row="5"></textarea>
-                                </div>
+                              
 
                                 <div class="col-md-12 mt-2">
                                    <button class="btn sp_theme_btn w-100" type="submit" {{ auth()->user()->is_account_freeze ? 'disabled' : '' }}>{{ __('Withdraw Now') }}</button>

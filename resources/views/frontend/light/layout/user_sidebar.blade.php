@@ -140,12 +140,12 @@
 	            </a>
 	        </li>
 
-	        <li>
+	        {{-- <li>
 	            <a href="{{ route('user.notifications') }}" class="{{ Config::activeMenu(route('user.notifications')) }}">
 	                <i class="fas fa-bell"></i>
 	                <span>{{ __('Alerts') }}</span>
 	            </a>
-	        </li>
+	        </li> --}}
 
 	        <li class="sidebar-open-btn">
             <a href="#0" class="">

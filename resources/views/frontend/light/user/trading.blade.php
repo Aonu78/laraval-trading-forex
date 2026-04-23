@@ -163,7 +163,7 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table sp_site_table">
+                        <table class="table">
                             <thead>
                                 <tr>
                                     <th>{{ __('Ref') }}</th>
@@ -253,7 +253,7 @@
                 <div class="modal-content border-0">
                     <div class="modal-header border-0">
                         <h5 class="modal-title">{{ __('Order Confirmation') }}</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="d-flex justify-content-between align-items-start mb-3">

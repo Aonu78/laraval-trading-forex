@@ -1,9 +1,22 @@
 
 
 <?php $__env->startSection('content'); ?>
+<style>
+.col-12 {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+}
+
+@media (min-width: 992px) {
+    .col-lg-6 {
+        flex: 0 0 auto !important;
+        width: 50% !important;
+    }
+}
+</style>
     <div class="row gy-4">
         <?php $__empty_1 = true; $__currentLoopData = $gateways; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gateway): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <div class="col-xxl-2 col-lg-3 col-sm-4 col-6">
+            <div class="col-lg-6 col-12">
                 <div class="payment-box text-center">
                     <div class="payment-box-thumb">
                         <img src="<?php echo e(Config::getFile('gateways', $gateway->image, true)); ?>" alt="Lights" class="trans-img">

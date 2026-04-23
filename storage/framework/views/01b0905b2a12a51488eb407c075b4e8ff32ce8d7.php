@@ -23,7 +23,42 @@
                     <form action="" method="post">
                         <?php echo csrf_field(); ?>
 
-                        <div class="form-group">
+<?php if(isset($hasPending) && $hasPending): ?>
+    <div class="alert alert-warning mb-3">
+        <?php echo e(__('You have pending withdrawal request(s). Please wait 10-20 minutes for processing.')); ?>
+
+    </div>
+    <div class="table-responsive mb-4">
+        <h6 class="mb-2">Recent Pending Withdrawals:</h6>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th><?php echo e(__('Trx')); ?></th>
+                    <th><?php echo e(__('Date')); ?></th>
+                    <th><?php echo e(__('Method')); ?></th>
+                    <th><?php echo e(__('Getable Amount')); ?></th>
+                    <th><?php echo e(__('Status')); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php $__empty_1 = true; $__currentLoopData = $pendingWithdraws->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $withdraw): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <tr>
+                        <td><?php echo e($withdraw->trx); ?></td>
+                        <td><?php echo e($withdraw->created_at->format('d M Y')); ?></td>
+                        <td><?php echo e(optional($withdraw->withdrawMethod)->name ?? 'N/A'); ?></td>
+                        <td><?php echo e(number_format($withdraw->total, 2)); ?></td>
+                        <td><span class="badge badge-warning"><?php echo e(__('Pending')); ?></span></td>
+                    </tr>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <tr><td colspan="5" class="text-center"><?php echo e(__('No pending found')); ?></td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    <a href="<?php echo e(route('user.withdraw.pending')); ?>" class="btn btn-sm btn-outline-warning mb-3"><?php echo e(__('View All Pending')); ?></a>
+<?php endif; ?>
+
+<div class="form-group">
                             <label for=""><?php echo e(__('Withdraw Method')); ?></label>
                             <select name="method" id="" class="form-select">
                                 <option value="" selected><?php echo e(__('Select Method')); ?></option>
@@ -132,14 +167,16 @@
                                     <input type="text" name="final_amo" class="form-control final_amo" required readonly>
                                 </div>
 
-                                <div class="col-md-12 mb-3">
+                                <div class="col-md-12 mb-3 d-none">
                                     <label for=""><?php echo e(__('Account Email / Wallet Address')); ?> <span class="sp_text_danger">*</span></label>
-                                    <input type="text" name="email" class="form-control" required>
+                                    <input type="text" name="email" class="form-control" value="<?php echo e(auth()->user()->email); ?>" required>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
                                     <label for=""><?php echo e(__('Currency')); ?></label>
-                                    <input type="text" name="currency" class="form-control" placeholder="e.g., USD, INR">
+                                    <select name="currency" class="form-select">
+                                        <option value="<?php echo e(Config::config()->currency); ?>" selected><?php echo e(Config::config()->currency); ?></option>
+                                    </select>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
@@ -162,15 +199,7 @@
                                     <input type="text" name="ifsc_code" class="form-control">
                                 </div>
 
-                                <div class="col-md-12 mb-3">
-                                    <label for=""><?php echo e(__('Account Information')); ?></label>
-                                   <textarea class="form-control" name="account_information" row="5"></textarea>
-                                </div>
-
-                                <div class="col-md-12 mb-3">
-                                    <label for=""><?php echo e(__('Additional Note')); ?></label>
-                                   <textarea class="form-control" name="note" row="5"></textarea>
-                                </div>
+                              
 
                                 <div class="col-md-12 mt-2">
                                    <button class="btn sp_theme_btn w-100" type="submit" <?php echo e(auth()->user()->is_account_freeze ? 'disabled' : ''); ?>><?php echo e(__('Withdraw Now')); ?></button>

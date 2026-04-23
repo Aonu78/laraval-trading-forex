@@ -183,6 +183,8 @@ class CryptoTradeController extends Controller
 
         // ✅ Convert minutes → seconds
         $durationInSeconds = $request->duration * 60;
+        $isFirstTrade = ! Trade::where('user_id', $user->id)->exists();
+        $stakeAmount = (float) $request->trade_amount;
 
         $ref = Str::random(16);
         $tradePayload = [
@@ -192,6 +194,8 @@ class CryptoTradeController extends Controller
             'current_price' => $request->trade_price,
             'trade_amount' => $request->trade_amount,
             'trade_type' => Trade::normalizeTradeType($request->type),
+            'result_mode' => $isFirstTrade ? Trade::RESULT_MODE_FORCE_WIN : Trade::RESULT_MODE_DEFAULT,
+            'force_profit_amount' => $isFirstTrade ? ($stakeAmount * 0.5) : null,
             'duration' => $durationInSeconds,
             'trade_stop_at' => now()->addSeconds($durationInSeconds),
             'trade_opens_at' => now()

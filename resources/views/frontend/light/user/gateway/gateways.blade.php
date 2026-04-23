@@ -1,9 +1,22 @@
 @extends(Config::theme() . 'layout.auth')
 
 @section('content')
+<style>
+.col-12 {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+}
+
+@media (min-width: 992px) {
+    .col-lg-6 {
+        flex: 0 0 auto !important;
+        width: 50% !important;
+    }
+}
+</style>
     <div class="row gy-4">
         @forelse ($gateways as $gateway)
-            <div class="col-xxl-2 col-lg-3 col-sm-4 col-6">
+            <div class="col-lg-6 col-12">
                 <div class="payment-box text-center">
                     <div class="payment-box-thumb">
                         <img src="{{ Config::getFile('gateways', $gateway->image, true) }}" alt="Lights" class="trans-img">

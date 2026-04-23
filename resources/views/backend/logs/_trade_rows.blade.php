@@ -8,13 +8,14 @@
                     {{ $trade->user->username }}
                 </span>
             </a>
-        </td>
-        <td>{{ $trade->currency }}</td>
-        <td>{{ Config::formatter($trade->current_price) }}</td>
-
-        <td>
-            <i class="{{ $trade->trade_icon_class }}"></i>
-            {{ __($trade->trade_label) }}
+	        </td>
+	        <td>{{ $trade->currency }}</td>
+	        <td>{{ Config::formatter($trade->current_price) }}</td>
+	        <td>{{ Config::formatter($trade->trade_amount ?? 0) }}</td>
+	
+	        <td>
+	            <i class="{{ $trade->trade_icon_class }}"></i>
+	            {{ __($trade->trade_label) }}
         </td>
 
         <td>

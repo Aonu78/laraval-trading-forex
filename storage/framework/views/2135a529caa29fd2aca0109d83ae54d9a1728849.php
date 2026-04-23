@@ -14,8 +14,8 @@
     ?>
 <?php endif; ?>
 <style>
-d-left-wrapper {
-    .background-color: #fffckjhsjdhks;
+.d-left-wrapper {
+    background-color: rgba(15, 23, 42, 0.92);
 }
 
 </style>
@@ -26,7 +26,7 @@ d-left-wrapper {
                     <div id="countdownTwo"></div>
                 </div>
                 <div class="row g-sm-4 g-3">
-                    <div class="custom-xxl-3 col-xxl-3 col-xl-3 col-lg-3 col-3">
+                    <div class="custom-xxl-6 col-xxl-6 col-xl-6 col-lg-6 col-6">
                         <div class="d-card d-icon-card">
                             <div class="d-card-icon gr-bg-1">
                                 <i class="las la-credit-card"></i>
@@ -37,7 +37,7 @@ d-left-wrapper {
                             </div>
                         </div>
                     </div>
-                    <div class="custom-xxl-3 col-xxl-3 col-xl-3 col-lg-3 col-3">
+                    <div class="custom-xxl-6 col-xxl-6 col-xl-6 col-lg-6 col-6">
                         <div class="d-card d-icon-card">
                             <div class="d-card-icon gr-bg-2">
                                 <i class="las la-hand-holding-usd"></i>
@@ -48,7 +48,7 @@ d-left-wrapper {
                             </div>
                         </div>
                     </div>
-                    <div class="custom-xxl-3 col-xxl-3 col-xl-3 col-lg-3 col-3">
+                    <div class="custom-xxl-6 col-xxl-6 col-xl-6 col-lg-6 col-6">
                         <div class="d-card d-icon-card">
                             <div class="d-card-icon gr-bg-3">
                                 <i class="las la-chart-bar"></i>
@@ -59,7 +59,7 @@ d-left-wrapper {
                             </div>
                         </div>
                     </div>
-                    <div class="custom-xxl-3 col-xxl-3 col-xl-3 col-lg-3 col-3">
+                    <div class="custom-xxl-6 col-xxl-6 col-xl-6 col-lg-6 col-6">
                         <div class="d-card d-icon-card">
                             <div class="d-card-icon gr-bg-4">
                                 <i class="las la-heartbeat"></i>
@@ -121,11 +121,7 @@ d-left-wrapper {
                                 <a href="<?php echo e(route('user.transaction.log')); ?>" class="btn sp_theme_btn mt-4 w-100"><i class="fas fa-rocket me-2"></i> <?php echo e(__('View All Transaction')); ?></a>
                             </div>
                         </div>
-                        <div class="col-xl-12 col-lg-6">
-                            <?php echo $__env->make('frontend.partials.coin_market_board', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-
-                            
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -230,8 +226,8 @@ d-left-wrapper {
                 }
             }
 
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
+            // updateCountdown();
+            // setInterval(updateCountdown, 1000);
 
             const marketCaps = {
                 BTC: '$496.14M',

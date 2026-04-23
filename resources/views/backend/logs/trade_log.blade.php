@@ -29,16 +29,17 @@
                     <div class="table-responsive">
                         <table class="table">
                             <thead>
-                                <tr>
-                                    <th>{{ __('Ref') }}</th>
-                                    <th>{{ __('User') }}</th>
-                                    <th>{{ __('Currency Sym') }}</th>
-                                    <th>{{ __('Trade Price At') }}</th>
+	                                <tr>
+	                                    <th>{{ __('Ref') }}</th>
+	                                    <th>{{ __('User') }}</th>
+	                                    <th>{{ __('Currency Sym') }}</th>
+	                                    <th>{{ __('Trade Price At') }}</th>
+	                                    <th>{{ __('Trade Amount') }}</th>
 
-                                    <th>{{ __('Trade Type') }}</th>
-                                    <th>{{ __('Trade Close At') }}</th>
-                                    <th>{{ __('Profit/Loss') }}</th>
-                                    <th>{{ __('Result Mode') }}</th>
+	                                    <th>{{ __('Trade Type') }}</th>
+	                                    <th>{{ __('Trade Close At') }}</th>
+	                                    <th>{{ __('Profit/Loss') }}</th>
+	                                    <th>{{ __('Result Mode') }}</th>
                                     <th>{{ __('Win Amount') }}</th>
                                     <th>{{ __('Status') }}</th>
                                 </tr>

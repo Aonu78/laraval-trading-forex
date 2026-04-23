@@ -123,12 +123,7 @@
 	            </a>
 	        </li>
 
-	        <li>
-	            <a href="<?php echo e(route('user.notifications')); ?>" class="<?php echo e(Config::activeMenu(route('user.notifications'))); ?>">
-	                <i class="fas fa-bell"></i>
-	                <span><?php echo e(__('Alerts')); ?></span>
-	            </a>
-	        </li>
+	        
 
 	        <li class="sidebar-open-btn">
             <a href="#0" class="">

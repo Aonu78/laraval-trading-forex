@@ -42,6 +42,7 @@
     </style>
 
     <style>
+        
         .user-pages-body.user-dark-mode {
             background: #0b1120;
             color: #d7e0ea;
@@ -226,6 +227,95 @@
             border-color: #0ea5e9;
             color: #08101d;
         }
+
+        .user-pages-body.light-force-mobile-user {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .user-pages-body.light-force-mobile-user .user-header,
+        .user-pages-body.light-force-mobile-user .mobile-bottom-menu-wrapper {
+            width: 100%;
+            left: 0;
+            transform: none;
+        }
+
+        .user-pages-body.light-force-mobile-user .user-header {
+            padding: 0.625rem 0.9375rem;
+            height: 60px;
+        }
+
+        .user-pages-body.light-force-mobile-user .user-header .site-logo {
+            opacity: 1;
+            visibility: visible;
+            max-width: 145px;
+            max-height: 35px;
+        }
+
+        .user-pages-body.light-force-mobile-user .user-header .site-logo img {
+            max-height: 40px;
+        }
+
+        /* .user-pages-body.light-force-mobile-user .sidebar-toggeler {
+            display: inline-flex !important;
+        } */
+
+        .user-pages-body.light-force-mobile-user .sidebar-toggeler {
+            display: none !important;
+        }
+
+        .user-pages-body.light-force-mobile-user .user-sidebar {
+            left: -100%;
+            width: 100%;
+            max-width: 100%;
+            height: 100vh;
+            z-index: 1050;
+            transform: none;
+            border-right: 0;
+        }
+
+        .user-pages-body.light-force-mobile-user .user-sidebar.active {
+            left: 0;
+        }
+
+        .user-pages-body.light-force-mobile-user .user-sidebar .user-sidebar-bottom {
+            display: none;
+        }
+
+        .user-pages-body.light-force-mobile-user .dashbaord-main {
+            padding: 5rem 0.9375rem 6.25rem 0.9375rem !important;
+            min-height: 100vh;
+        }
+
+        .user-pages-body.light-force-mobile-user .mobile-bottom-menu-wrapper {
+            display: block !important;
+            z-index: 1040;
+        }
+
+        .user-pages-body.light-force-mobile-user .d-card.user-card .btn,
+        .user-pages-body.light-force-mobile-user .sp_site_card .btn,
+        .user-pages-body.light-force-mobile-user .card-header-items,
+        .user-pages-body.light-force-mobile-user .card-header-item {
+            width: 100%;
+        }
+
+        .user-pages-body.light-force-mobile-user .row > [class*="col-"] {
+            width: 100%;
+            flex: 0 0 100%;
+        }
+
+        .user-pages-body.light-force-mobile-user .d-left-wrapper > .row > .custom-xxl-6,
+        .user-pages-body.light-force-mobile-user .d-left-wrapper > .row > .col-6 {
+            width: 50%;
+            flex: 0 0 50%;
+        }
+
+        .user-pages-body.light-force-mobile-user .dashbaord-main.active {
+            padding-left: 0.9375rem !important;
+        }
     </style>
 
     <?php echo $__env->yieldPushContent('external-css'); ?>
@@ -236,7 +326,7 @@
 
 </head>
 
-<body class="user-pages-body user-dark-mode">
+<body class="user-pages-body user-dark-mode light-force-mobile-user">
 
     <?php echo $__env->make(Config::theme() . 'layout.user_sidebar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
@@ -250,8 +340,7 @@
 
 
         <div class="dropdown user-dropdown">
-            <a type="button" target="_blank" href="<?php echo e(route('home')); ?>"
-                class="btn sp_theme_btn btn-sm"><?php echo e(__('Visit Home')); ?></a>
+            
             <button class="user-btn dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
                 aria-expanded="false">
                 <img src="<?php echo e(Config::getFile('user', auth()->user()->image, true)); ?>" alt="image">

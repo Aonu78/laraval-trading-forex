@@ -17,7 +17,7 @@
 @endif
 <style>
 .d-left-wrapper {
-    background-color: #fffckjhsjdhks;
+    background-color: rgba(15, 23, 42, 0.92);
 }
 
 </style>
@@ -28,7 +28,7 @@
                     <div id="countdownTwo"></div>
                 </div>
                 <div class="row g-sm-4 g-3">
-                    <div class="custom-xxl-3 col-xxl-3 col-xl-3 col-lg-3 col-3">
+                    <div class="custom-xxl-6 col-xxl-6 col-xl-6 col-lg-6 col-6">
                         <div class="d-card d-icon-card">
                             <div class="d-card-icon gr-bg-1">
                                 <i class="las la-credit-card"></i>
@@ -39,7 +39,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="custom-xxl-3 col-xxl-3 col-xl-3 col-lg-3 col-3">
+                    <div class="custom-xxl-6 col-xxl-6 col-xl-6 col-lg-6 col-6">
                         <div class="d-card d-icon-card">
                             <div class="d-card-icon gr-bg-2">
                                 <i class="las la-hand-holding-usd"></i>
@@ -50,7 +50,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="custom-xxl-3 col-xxl-3 col-xl-3 col-lg-3 col-3">
+                    <div class="custom-xxl-6 col-xxl-6 col-xl-6 col-lg-6 col-6">
                         <div class="d-card d-icon-card">
                             <div class="d-card-icon gr-bg-3">
                                 <i class="las la-chart-bar"></i>
@@ -61,7 +61,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="custom-xxl-3 col-xxl-3 col-xl-3 col-lg-3 col-3">
+                    <div class="custom-xxl-6 col-xxl-6 col-xl-6 col-lg-6 col-6">
                         <div class="d-card d-icon-card">
                             <div class="d-card-icon gr-bg-4">
                                 <i class="las la-heartbeat"></i>
@@ -102,7 +102,7 @@
                                     @if (auth()->user()->is_account_freeze)
                                         <span class="badge badge-danger mt-2">{{ __('Account Freeze') }}</span>
                                     @endif
-                                    <div class="mt-4">
+                                    <div class="mt-4 d-flex">
                                         <a href="{{ route('user.withdraw') }}" class="btn btn-md sp_btn_danger me-xxl-3 me-2"><i class="las la-minus-circle fs-lg"></i> {{ __('Withdraw') }}</a>
                                         <a href="{{ route('user.deposit') }}" class="btn btn-md sp_btn_success ms-xxl-3 ms-2"><i class="las la-plus-circle fs-lg"></i> {{ __('Deposit') }}</a>
                                     </div>
@@ -123,19 +123,7 @@
                                 <a href="{{ route('user.transaction.log') }}" class="btn sp_theme_btn mt-4 w-100"><i class="fas fa-rocket me-2"></i> {{ __('View All Transaction') }}</a>
                             </div>
                         </div>
-                        <div class="col-xl-12 col-lg-6">
-                            @include('frontend.partials.coin_market_board')
-
-                            {{-- <h6 class="mb-2 mt-4">{{ __('Your Referral Link') }}</h6>
-                            <form>
-                                <div class="input-group">
-                                    <input type="text" class="form-control copy-text" placeholder="Referral link"
-                                        value="{{ route('user.register', $user->username) }}" readonly>
-                                        <button type="button" class="input-group-text sp_bg_base px-4 copy
-                                        ">{{ __('Copy') }}</button>
-                                </div>
-                            </form> --}}
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -207,7 +195,7 @@
                                     @if (auth()->user()->is_account_freeze)
                                         <span class="badge badge-danger mt-2">{{ __('Account Freeze') }}</span>
                                     @endif
-                                    <div class="mt-4">
+                                    <div class="mt-4 d-flex">
                                         <a href="{{ route('user.withdraw') }}" class="btn btn-md sp_btn_danger me-xxl-3 me-2"><i class="las la-minus-circle fs-lg"></i> {{ __('Withdraw') }}</a>
                                         <a href="{{ route('user.deposit') }}" class="btn btn-md sp_btn_success ms-xxl-3 ms-2"><i class="las la-plus-circle fs-lg"></i> {{ __('Deposit') }}</a>
                                     </div>
@@ -312,8 +300,8 @@
                 }
             }
 
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
+            // updateCountdown();
+            // setInterval(updateCountdown, 1000);
 
             const marketCaps = {
                 BTC: '$496.14M',

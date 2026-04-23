@@ -30,7 +30,7 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table sp_site_table">
+                        <table class="table">
                             <thead>
                                 <tr>
                                     <th>{{ __('Trx') }}</th>
