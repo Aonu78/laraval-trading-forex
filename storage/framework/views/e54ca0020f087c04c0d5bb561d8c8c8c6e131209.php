@@ -14,15 +14,9 @@
         <td><?php echo e(Config::formatter($trade->current_price)); ?></td>
 
         <td>
-            <?php if($trade->trade_type == 'buy'): ?>
-                <i class="fas fa-arrow-alt-circle-up text-success"></i>
-                <?php echo e($trade->trade_type); ?>
+            <i class="<?php echo e($trade->trade_icon_class); ?>"></i>
+            <?php echo e(__($trade->trade_label)); ?>
 
-            <?php else: ?>
-                <i class="fas fa-arrow-alt-circle-down text-danger"></i>
-                <?php echo e($trade->trade_type); ?>
-
-            <?php endif; ?>
         </td>
 
         <td>

@@ -98,7 +98,14 @@
                             class="nav-text"><?php echo e(__('Manage Users')); ?></span></a>
                 </li>
             <?php endif; ?>
-
+            <?php if(auth()->guard('admin')->user()->can('manage-logs')): ?>
+                <li>
+                    <a href="<?php echo e(route('admin.trade')); ?>" aria-expanded="false">
+                        <i data-feather="file-text"></i>
+                        <span class="nav-text"><?php echo e(__('Manage Trades')); ?></span>
+                    </a>
+                </li>
+            <?php endif; ?>
             <?php if(auth()->guard('admin')->user()->can('manage-setting') ||
                     auth()->guard('admin')->user()->can('manage-email') ||
                     auth()->guard('admin')->user()->can('manage-theme') ||
@@ -196,6 +203,7 @@
 
 
             <li class="nav-label"><?php echo e(__('Others')); ?></li>
+            
             <?php if(auth()->guard('admin')->user()->can('manage-logs')): ?>
                 <li>
                     <a href="<?php echo e(route('admin.transaction')); ?>" aria-expanded="false">

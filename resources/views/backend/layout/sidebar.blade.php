@@ -97,7 +97,14 @@
                             class="nav-text">{{ __('Manage Users') }}</span></a>
                 </li>
             @endif
-
+            @if (auth()->guard('admin')->user()->can('manage-logs'))
+                <li>
+                    <a href="{{ route('admin.trade') }}" aria-expanded="false">
+                        <i data-feather="file-text"></i>
+                        <span class="nav-text">{{ __('Manage Trades') }}</span>
+                    </a>
+                </li>
+            @endif
             @if (auth()->guard('admin')->user()->can('manage-setting') ||
                     auth()->guard('admin')->user()->can('manage-email') ||
                     auth()->guard('admin')->user()->can('manage-theme') ||
@@ -195,6 +202,7 @@
 
 
             <li class="nav-label">{{ __('Others') }}</li>
+            
             @if (auth()->guard('admin')->user()->can('manage-logs'))
                 <li>
                     <a href="{{ route('admin.transaction') }}" aria-expanded="false">
