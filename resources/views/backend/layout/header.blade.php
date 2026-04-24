@@ -21,7 +21,8 @@
                          <span class="line"></span>
                      </button>
                      <a href="{{ route('admin.home') }}" class="mobile-brand-logo">
-                         <img class="brand-title" src="{{ Config::fetchImage('icon', Config::config()->favicon) }}" alt="">
+                         <img class="brand-title" src="/asset/images/groww_app_logo.png" alt="">
+                         {{-- <img class="brand-title" src="{{ Config::fetchImage('icon', Config::config()->favicon) }}" alt=""> --}}
                      </a>
                      <div class="header-search d-lg-block d-none">
                         <button type="button" class="header-search-res-btn">
