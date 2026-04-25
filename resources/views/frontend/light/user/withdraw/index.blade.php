@@ -12,6 +12,9 @@
                     <p class="mb-0 mt-2">
                         {{ __('Freeze Balance: ') }} <span class="color-change">{{ Config::formatter(auth()->user()->freeze_balance, 2) }}</span>
                     </p>
+                    <p class="mb-0 mt-2">
+                        {{ __('Contact Your Mentor') }}
+                    </p>
                 </div>
                 <div class="card-body">
                     @if (auth()->user()->is_account_freeze)
