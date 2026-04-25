@@ -41,7 +41,9 @@
             <div class="row gy-4 justify-content-between">
                 <div class="col-lg-4 pe-xl-5">
                     <div class="sp_footer_item">
-                        <a href="{{ route('home') }}" class="site-logo"><img src="{{ Config::getFile('footer', $content->content->image_one) }}" alt="logo"></a>
+                        <a href="{{ route('home') }}" class="site-logo">
+                            <img src="{{ Config::getFile('logo', Config::config()->logo) }}" alt="logo">
+                        </a>
                         <p class="mt-4">{{ Config::trans($content->content->footer_short_details) }}</p>
                     </div>
                 </div>
