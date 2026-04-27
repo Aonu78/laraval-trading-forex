@@ -53,7 +53,7 @@
 	                    <span class="noti-count"><?php echo e(auth()->user()->unreadNotifications()->count()); ?></span>
 	                <?php endif; ?>
 	            </a></li>
-
+                
         
 
 

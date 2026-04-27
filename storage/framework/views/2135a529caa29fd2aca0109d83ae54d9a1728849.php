@@ -68,9 +68,10 @@
                                 <?php
                                     $healthClass = $profileHealth < 40 ? 'bg-danger' : ($profileHealth < 60 ? 'bg-warning' : ($profileHealth < 80 ? 'bg-info' : 'bg-success'));
                                 ?>
-                                <h4 class="d-card-amount profile-health-percent"><?php echo e($profileHealth); ?>%</h4>
+                                <h4 class="d-card-amount profile-health-percent"><?php echo e($profileHealth); ?></h4>
                                 <p class="d-card-caption"><?php echo e(__('Credit Score')); ?></p>
-                                
+                                <small class="text-muted d-block"><?php echo e(auth()->user()->level ?? 'VIP1'); ?></small>
+
                                 <div class="progress" style="height: 8px;">
                                     <div class="progress-bar <?php echo e($healthClass); ?>"
                                         role="progressbar"
@@ -100,7 +101,7 @@
                                     <?php if(auth()->user()->is_account_freeze): ?>
                                         <span class="badge badge-danger mt-2"><?php echo e(__('Account Freeze')); ?></span>
                                     <?php endif; ?>
-                                    <div class="mt-4">
+                                    <div class="mt-4 d-flex">
                                         <a href="<?php echo e(route('user.withdraw')); ?>" class="btn btn-md sp_btn_danger me-xxl-3 me-2"><i class="las la-minus-circle fs-lg"></i> <?php echo e(__('Withdraw')); ?></a>
                                         <a href="<?php echo e(route('user.deposit')); ?>" class="btn btn-md sp_btn_success ms-xxl-3 ms-2"><i class="las la-plus-circle fs-lg"></i> <?php echo e(__('Deposit')); ?></a>
                                     </div>
@@ -142,7 +143,7 @@
                                     <?php if(auth()->user()->is_account_freeze): ?>
                                         <span class="badge badge-danger mt-2"><?php echo e(__('Account Freeze')); ?></span>
                                     <?php endif; ?>
-                                    <div class="mt-4">
+                                    <div class="mt-4 d-flex">
                                         <a href="<?php echo e(route('user.withdraw')); ?>" class="btn btn-md sp_btn_danger me-xxl-3 me-2"><i class="las la-minus-circle fs-lg"></i> <?php echo e(__('Withdraw')); ?></a>
                                         <a href="<?php echo e(route('user.deposit')); ?>" class="btn btn-md sp_btn_success ms-xxl-3 ms-2"><i class="las la-plus-circle fs-lg"></i> <?php echo e(__('Deposit')); ?></a>
                                     </div>

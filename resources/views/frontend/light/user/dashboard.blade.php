@@ -34,8 +34,8 @@
                                 <i class="las la-credit-card"></i>
                             </div>
                             <div class="d-card-content">
-                                <h4 class="d-card-amount">{{ Config::formatter($totalDeposit) }}</h4>
-                                <p class="d-card-caption">{{ __('Total Deposit') }}</p>
+                                <h4 class="d-card-balance mt-xxl-3 mt-2">{{ Config::formatter($totalbalance) }}</h4>                                    
+                                <p class="d-card-caption">{{ __('Total Balance') }}</p>
                             </div>
                         </div>
                     </div>
@@ -70,9 +70,10 @@
                                 @php
                                     $healthClass = $profileHealth < 40 ? 'bg-danger' : ($profileHealth < 60 ? 'bg-warning' : ($profileHealth < 80 ? 'bg-info' : 'bg-success'));
                                 @endphp
-                                <h4 class="d-card-amount profile-health-percent">{{ $profileHealth }}%</h4>
+                                <h4 class="d-card-amount profile-health-percent">{{ $profileHealth }}</h4>
                                 <p class="d-card-caption">{{ __('Credit Score') }}</p>
-                                
+                                <small class="text-muted d-block">{{ auth()->user()->level ?? 'VIP1' }}</small>
+
                                 <div class="progress" style="height: 8px;">
                                     <div class="progress-bar {{ $healthClass }}"
                                         role="progressbar"

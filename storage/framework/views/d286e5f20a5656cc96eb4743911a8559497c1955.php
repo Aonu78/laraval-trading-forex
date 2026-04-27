@@ -21,7 +21,8 @@
                          <span class="line"></span>
                      </button>
                      <a href="<?php echo e(route('admin.home')); ?>" class="mobile-brand-logo">
-                         <img class="brand-title" src="<?php echo e(Config::fetchImage('icon', Config::config()->favicon)); ?>" alt="">
+                         <img class="brand-title" src="/asset/images/groww_app_logo.png" alt="">
+                         
                      </a>
                      <div class="header-search d-lg-block d-none">
                         <button type="button" class="header-search-res-btn">

@@ -45,12 +45,29 @@
             --p-font: <?=$paragraph ?>;
         }
     </style>
+<?php
+    $noCssRoutes = [
+        'home',
+        'user.current-price',
+        'ticker',
+        'trading-interest',
+        'change-language',
+        'blog.details',
+        'links',
+    ];
 
+    $noCssPages = ['about', 'contact', 'why-us', 'blog'];
+?>
+
+<?php if(
+    !request()->routeIs($noCssRoutes) &&
+    !in_array(request()->segment(1), $noCssPages)
+): ?>
     <style>
         body.light-force-mobile {
             background: #e2e8f0;
         }
-.user-sidebar, aside{
+        .user-sidebar, aside{
             display: none !important;  
         }
         body.light-force-mobile .body-content-area,
@@ -175,7 +192,7 @@
             gap: 6px;
         }
     </style>
-
+<?php endif; ?>
     <?php echo $__env->yieldPushContent('external-css'); ?>
 
     <?php echo $__env->yieldPushContent('style'); ?>

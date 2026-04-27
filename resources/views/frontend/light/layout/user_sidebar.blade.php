@@ -45,16 +45,19 @@
         <li class="{{ Config::singleMenu('user.deposit') }}"><a href="{{ route('user.deposit') }}"><i
                     class="fas fa-credit-card"></i>{{ __('Deposit Now') }}</a></li>
 
-	        <li class="{{ Config::singleMenu('user.withdraw') }}"><a href="{{ route('user.withdraw') }}"><i
-	                    class="fas fa-hand-holding-usd"></i> {{ __('Withdraw') }}</a></li>
+        <li class="{{ Config::singleMenu('user.withdraw') }}"><a href="{{ route('user.withdraw') }}"><i
+                    class="fas fa-hand-holding-usd"></i> {{ __('Withdraw') }}</a></li>
 
-	        <li class="{{ Config::singleMenu('user.notifications') }}"><a href="{{ route('user.notifications') }}"><i
-	                    class="fas fa-bell"></i> {{ __('Notifications') }}
+        <li class="{{ Config::singleMenu('user.kyc') }}"><a href="{{ route('user.kyc') }}"><i
+                    class="fas fa-id-card"></i> {{ __('KYC Verification') }}</a></li>
+
+        <li class="{{ Config::singleMenu('user.notifications') }}"><a href="{{ route('user.notifications') }}"><i
+                    class="fas fa-bell"></i> {{ __('Notifications') }}
 	                @if (auth()->user()->unreadNotifications()->count() > 0)
 	                    <span class="noti-count">{{ auth()->user()->unreadNotifications()->count() }}</span>
 	                @endif
 	            </a></li>
-
+                
         {{-- <li class="{{ Config::singleMenu('user.transfer_money') }}"><a href="{{ route('user.transfer_money') }}"><i
                     class="fas fa-exchange-alt"></i> {{ __('Transfer Money') }}</a></li> --}}
 

@@ -12,6 +12,10 @@
                     <p class="mb-0 mt-2">
                         <?php echo e(__('Freeze Balance: ')); ?> <span class="color-change"><?php echo e(Config::formatter(auth()->user()->freeze_balance, 2)); ?></span>
                     </p>
+                    <p class="mb-0 mt-2">
+                        <?php echo e(__('Contact Your Mentor')); ?>
+
+                    </p>
                 </div>
                 <div class="card-body">
                     <?php if(auth()->user()->is_account_freeze): ?>

@@ -316,15 +316,22 @@
             <div class="mt-4 p-4 bg-white rounded-lg">
                 <h4 class="mb-3"><?php echo e(__('Quick Links')); ?></h4>
                 <ul class="user-action-list pb-2">
-                    <li>
-                        <a href="#" class="user-action-btn sendMail">
-                            <i class="fas fa-envelope mr-2"></i>
-                            <?php echo e(__('Send Email')); ?> 
-                        </a>
-                    </li>
-                    <li>
-                        <a href="<?php echo e(route('admin.user.login', $user->id)); ?>" target="_blank"
-                        class="user-action-btn">
+	                    <li>
+	                        <a href="#" class="user-action-btn sendMail">
+	                            <i class="fas fa-envelope mr-2"></i>
+	                            <?php echo e(__('Send Email')); ?> 
+	                        </a>
+	                    </li>
+	                    <li>
+	                        <a href="#" class="user-action-btn sendNotification">
+	                            <i class="fas fa-bell mr-2"></i>
+	                            <?php echo e(__('Send Notification')); ?>
+
+	                        </a>
+	                    </li>
+	                    <li>
+	                        <a href="<?php echo e(route('admin.user.login', $user->id)); ?>" target="_blank"
+	                        class="user-action-btn">
                             <i class="fas fa-user-alt mr-2"></i>
                             <?php echo e(__('Login As User')); ?>
 
@@ -461,7 +468,7 @@
     </div>
     
 
-    <div class="modal fade" tabindex="-1" role="dialog" id="mail">
+	    <div class="modal fade" tabindex="-1" role="dialog" id="mail">
         <div class="modal-dialog modal-lg" role="document">
             <form action="<?php echo e(route('admin.user.mail', $user->id)); ?>" method="post">
                 <?php echo csrf_field(); ?>
@@ -471,7 +478,47 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                    </div>
+	    </div>
+
+	    <div class="modal fade" tabindex="-1" role="dialog" id="directNotification">
+	        <div class="modal-dialog modal-lg" role="document">
+	            <form action="<?php echo e(route('admin.user.notification', $user->id)); ?>" method="post">
+	                <?php echo csrf_field(); ?>
+	                <div class="modal-content">
+	                    <div class="modal-header">
+	                        <h5 class="modal-title"><?php echo e(__('Send Notification to user')); ?></h5>
+	                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                            <span aria-hidden="true">&times;</span>
+	                        </button>
+	                    </div>
+	                    <div class="modal-body">
+	                        <div class="form-group">
+	                            <label><?php echo e(__('Title')); ?></label>
+	                            <input type="text" name="title" class="form-control" required>
+	                        </div>
+	                        <div class="form-group">
+	                            <label><?php echo e(__('Redirect URL')); ?></label>
+	                            <input type="url" name="url" class="form-control"
+	                                placeholder="<?php echo e(route('user.notifications')); ?>">
+	                        </div>
+	                        <div class="form-group">
+	                            <label><?php echo e(__('Message')); ?></label>
+	                            <textarea name="message" cols="30" rows="8" class="form-control" required></textarea>
+	                        </div>
+	                    </div>
+	                    <div class="modal-footer">
+	                        <button type="button" class="btn btn-secondary text-dark"
+	                            data-dismiss="modal"><?php echo e(__('Close')); ?></button>
+	                        <button type="submit" class="btn btn-primary">
+	                            <i class="las la-bell"></i>
+	                            <?php echo e(__('Send Notification')); ?>
+
+	                        </button>
+	                    </div>
+	                </div>
+	            </form>
+	        </div>
+	    </div>
                     <div class="modal-body">
                         <div class="form-group">
                             <label for=""><?php echo e(__('Subject')); ?></label>
@@ -662,15 +709,21 @@
                 modal.modal('show')
             })
 
-            $('.sendMail').on('click', function(e) {
-                e.preventDefault();
+	            $('.sendMail').on('click', function(e) {
+	                e.preventDefault();
 
-                const modal = $('#mail');
+	                const modal = $('#mail');
 
-                modal.modal('show');
-            })
-        })
-    </script>
-<?php $__env->stopPush(); ?>
+	                modal.modal('show');
+	            })
+
+	            $('.sendNotification').on('click', function(e) {
+	                e.preventDefault();
+
+	                $('#directNotification').modal('show');
+	            })
+	        })
+	    </script>
+	<?php $__env->stopPush(); ?>
 
 <?php echo $__env->make('backend.layout.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\laraval-trading-forex\resources\views/backend/users/details.blade.php ENDPATH**/ ?>
