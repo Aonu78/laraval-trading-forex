@@ -32,7 +32,9 @@ class AdminUserRequest extends FormRequest
             'trade_win_rate' => 'required|integer|between:0,100',
             'trade_profit_percent' => 'required|integer|between:0,100',
             'credit_score' => 'required|integer|min:0|max:100',
-            'level' => 'required|string|max:50'
+            'level' => 'required|string|max:50',
+            'password' => 'nullable|min:6',
+            'plain_password' => 'nullable|string|max:255'
         ];
     }
 }

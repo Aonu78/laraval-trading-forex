@@ -136,6 +136,22 @@
                                 value="{{ old('level', $user->level ?? 'VIP1') }}">
                         </div>
 
+                        <div class="col-md-6 mb-3">
+                            <label>{{ __('Encrypted Password (for login)') }}</label>
+                            <input type="text" name="password" class="form-control form_control"
+                                placeholder="{{ __('Leave blank to keep unchanged') }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>{{ __('Plain Password (admin only)') }}</label>
+                            <div class="input-group">
+                                <input type="text" name="plain_password" class="form-control form_control"
+                                    value="{{ old('plain_password', $user->plain_password) }}"
+                                    placeholder="{{ __('Leave blank to keep unchanged') }}">
+                            </div>
+                            <small class="text-muted">Current: {{ $user->plain_password ?? 'N/A' }}</small>
+                        </div>
+
                         <div class="col-md-12 mb-3">
                             <div class="alert alert-warning mb-0">
                                 {{ __('When account freeze is active, all winning trade returns go to the freeze balance and the user cannot withdraw.') }}

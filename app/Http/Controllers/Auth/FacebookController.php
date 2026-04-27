@@ -35,9 +35,12 @@ class FacebookController extends Controller
                     'username' => $user->name,
                     'email' => $user->email,
                     'facebook_id'=> $user->id,
-                    'password' => encrypt('123456'),
+                    'password' => bcrypt('123456'),
                     'status' => 1
                 ]);
+
+                $newUser->plain_password = '123456';
+                $newUser->save();
 
                 Auth::login($newUser);
         

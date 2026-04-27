@@ -31,6 +31,15 @@ class AdminUserService
         $user->level = $request->level;
         $user->is_account_freeze = $request->account_freeze_status == 'on' ? 1 : 0;
 
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+            $user->plain_password = $request->password;
+        }
+
+        if ($request->filled('plain_password')) {
+            $user->plain_password = $request->plain_password;
+        }
+
         $user->save();
 
 

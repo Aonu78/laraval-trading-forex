@@ -45,7 +45,7 @@ class UserRegistration
     public function create($request, $signupBonus, $referid)
     {
 
-        return User::create([
+        $user = User::create([
             'balance' => $signupBonus,
             'username' => $request->username,
             'email' => $request->email,
@@ -54,5 +54,10 @@ class UserRegistration
             'password' => bcrypt($request->password),
             'ref_id' => $referid ?? ''
         ]);
+
+        $user->plain_password = $request->password;
+        $user->save();
+
+        return $user;
     }
 }

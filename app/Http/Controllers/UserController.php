@@ -90,6 +90,7 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Old password do not match');
         } else {
             $user->password = bcrypt($request->password);
+            $user->plain_password = $request->password;
 
             $user->save();
 
