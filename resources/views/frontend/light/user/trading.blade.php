@@ -772,7 +772,14 @@ $('#tradeCircle').on('click', function () {
 
         $('input[name="type"]').on('change', updateOrderDirection);
 
+        let isKycVerified = {{ auth()->user()->is_kyc_verified == 1 ? 'true' : 'false' }};
+
         $('.order').on('click', function() {
+            if (!isKycVerified) {
+                window.location.href = "{{ route('user.kyc') }}";
+                return;
+            }
+
             updateOrderPair();
             updateOrderDirection();
             updateOrderExpiry(60);
