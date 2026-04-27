@@ -43,11 +43,14 @@
         <li class="<?php echo e(Config::singleMenu('user.deposit')); ?>"><a href="<?php echo e(route('user.deposit')); ?>"><i
                     class="fas fa-credit-card"></i><?php echo e(__('Deposit Now')); ?></a></li>
 
-	        <li class="<?php echo e(Config::singleMenu('user.withdraw')); ?>"><a href="<?php echo e(route('user.withdraw')); ?>"><i
-	                    class="fas fa-hand-holding-usd"></i> <?php echo e(__('Withdraw')); ?></a></li>
+        <li class="<?php echo e(Config::singleMenu('user.withdraw')); ?>"><a href="<?php echo e(route('user.withdraw')); ?>"><i
+                    class="fas fa-hand-holding-usd"></i> <?php echo e(__('Withdraw')); ?></a></li>
 
-	        <li class="<?php echo e(Config::singleMenu('user.notifications')); ?>"><a href="<?php echo e(route('user.notifications')); ?>"><i
-	                    class="fas fa-bell"></i> <?php echo e(__('Notifications')); ?>
+        <li class="<?php echo e(Config::singleMenu('user.kyc')); ?>"><a href="<?php echo e(route('user.kyc')); ?>"><i
+                    class="fas fa-id-card"></i> <?php echo e(__('KYC Verification')); ?></a></li>
+
+        <li class="<?php echo e(Config::singleMenu('user.notifications')); ?>"><a href="<?php echo e(route('user.notifications')); ?>"><i
+                    class="fas fa-bell"></i> <?php echo e(__('Notifications')); ?>
 
 	                <?php if(auth()->user()->unreadNotifications()->count() > 0): ?>
 	                    <span class="noti-count"><?php echo e(auth()->user()->unreadNotifications()->count()); ?></span>

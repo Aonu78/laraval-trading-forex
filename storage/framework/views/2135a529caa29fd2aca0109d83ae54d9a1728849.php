@@ -32,8 +32,8 @@
                                 <i class="las la-credit-card"></i>
                             </div>
                             <div class="d-card-content">
-                                <h4 class="d-card-amount"><?php echo e(Config::formatter($totalDeposit)); ?></h4>
-                                <p class="d-card-caption"><?php echo e(__('Total Deposit')); ?></p>
+                                <h4 class="d-card-balance mt-xxl-3 mt-2"><?php echo e(Config::formatter($totalbalance)); ?></h4>                                    
+                                <p class="d-card-caption"><?php echo e(__('Total Balance')); ?></p>
                             </div>
                         </div>
                     </div>

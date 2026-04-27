@@ -7,10 +7,10 @@
                 <div class="card-header d-flex flex-wrap justify-content-between">
                     <div class="radio_button_list">
                         <div class="sp_site_radio">
-                            <input type="radio" class="form-check-input currency" id="trad-1" name="currency"
-                                value="BTS_USDT" data-pair="BTS/USDT" checked>
-                            <label class="form-check-label" for="trad-1">
-                                <?php echo e(__('BTS (USDT)')); ?>
+                            <input type="radio" class="form-check-input currency" id="trad-6" name="currency"
+                                value="BTC" data-pair="BTC" checked>
+                            <label class="form-check-label" for="trad-6">
+                                <?php echo e(__('BTC')); ?>
 
                             </label>
                         </div>
@@ -50,16 +50,15 @@
 
                             </label>
                         </div>
-
                         <div class="sp_site_radio">
-                            <input type="radio" class="form-check-input currency" id="trad-6" name="currency"
-                                value="BTC" data-pair="BTC">
-                            <label class="form-check-label" for="trad-6">
-                                <?php echo e(__('BTC')); ?>
+                            <input type="radio" class="form-check-input currency" id="trad-1" name="currency"
+                                value="BTS_USDT" data-pair="BTS/USDT">
+                            <label class="form-check-label" for="trad-1">
+                                <?php echo e(__('BTS (USDT)')); ?>
 
                             </label>
                         </div>
-
+                        
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-7" name="currency"
                                 value="BNB" data-pair="BNB">
@@ -785,7 +784,14 @@ $('#tradeCircle').on('click', function () {
 
         $('input[name="type"]').on('change', updateOrderDirection);
 
+        let isKycVerified = <?php echo e(auth()->user()->is_kyc_verified == 1 ? 'true' : 'false'); ?>;
+
         $('.order').on('click', function() {
+            if (!isKycVerified) {
+                window.location.href = "<?php echo e(route('user.kyc')); ?>";
+                return;
+            }
+
             updateOrderPair();
             updateOrderDirection();
             updateOrderExpiry(60);

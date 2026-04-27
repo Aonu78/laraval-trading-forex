@@ -7,10 +7,10 @@
                 <div class="card-header d-flex flex-wrap justify-content-between">
                     <div class="radio_button_list">
                         <div class="sp_site_radio">
-                            <input type="radio" class="form-check-input currency" id="trad-1" name="currency"
-                                value="BTS_USDT" data-pair="BTS/USDT" checked>
-                            <label class="form-check-label" for="trad-1">
-                                {{ __('BTS (USDT)') }}
+                            <input type="radio" class="form-check-input currency" id="trad-6" name="currency"
+                                value="BTC" data-pair="BTC" checked>
+                            <label class="form-check-label" for="trad-6">
+                                {{ __('BTC') }}
                             </label>
                         </div>
 
@@ -45,15 +45,14 @@
                                 {{ __('ETH (USDC)') }}
                             </label>
                         </div>
-
                         <div class="sp_site_radio">
-                            <input type="radio" class="form-check-input currency" id="trad-6" name="currency"
-                                value="BTC" data-pair="BTC">
-                            <label class="form-check-label" for="trad-6">
-                                {{ __('BTC') }}
+                            <input type="radio" class="form-check-input currency" id="trad-1" name="currency"
+                                value="BTS_USDT" data-pair="BTS/USDT">
+                            <label class="form-check-label" for="trad-1">
+                                {{ __('BTS (USDT)') }}
                             </label>
                         </div>
-
+                        
                         <div class="sp_site_radio">
                             <input type="radio" class="form-check-input currency" id="trad-7" name="currency"
                                 value="BNB" data-pair="BNB">
