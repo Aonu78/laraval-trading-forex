@@ -31,7 +31,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($pendingWithdraws->take(5) as $withdraw)
+                @forelse($pendingWithdraws as $withdraw)
                     <tr>
                         <td>{{ $withdraw->trx }}</td>
                         <td>{{ $withdraw->created_at->format('d M Y') }}</td>

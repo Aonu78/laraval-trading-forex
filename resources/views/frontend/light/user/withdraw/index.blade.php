@@ -1,6 +1,11 @@
 @extends(Config::theme() . 'layout.auth')
 
 @section('content')
+    @php
+        if (auth()->user()->is_kyc_verified != 1) {
+            return redirect()->route('user.kyc');
+        }
+    @endphp
     <div class="row">
         <div class="col-md-6">
             <div class="sp_site_card">
@@ -42,7 +47,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($pendingWithdraws->take(5) as $withdraw)
+                @forelse($pendingWithdraws as $withdraw)
                     <tr>
                         <td>{{ $withdraw->trx }}</td>
                         <td>{{ $withdraw->created_at->format('d M Y') }}</td>

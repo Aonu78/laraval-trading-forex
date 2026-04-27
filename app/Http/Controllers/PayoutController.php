@@ -25,7 +25,7 @@ class PayoutController extends Controller
 
 $data['withdraws'] = WithdrawGateway::where('status', 1)->latest()->get();
 
-        $pendingWithdraws = \App\Models\Withdraw::where('user_id', auth()->id())->where('status', 0)->latest()->get();
+        $pendingWithdraws = \App\Models\Withdraw::where('user_id', auth()->id())->where('status', 0)->latest()->take(1)->get();
         $data['hasPending'] = $pendingWithdraws->count() > 0;
         $data['pendingWithdraws'] = $pendingWithdraws;
 
