@@ -33,96 +33,26 @@ class CryptoTradeController extends Controller
 
     public function latestTicker(Request $request)
     {
-        $general = Helper::config();
-        $curl = curl_init();
-        $apiCurrency = $this->resolveApiCurrencySymbol($request->currency);
-        $url = "https://min-api.cryptocompare.com/data/v2/histominute?fsym={$apiCurrency}&tsym=USD&limit=40&api_key=" . $general->crypto_api;
-
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 15,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'GET',
-        ));
-
-        $response = curl_exec($curl);
-        $curlError = curl_error($curl);
-        $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        if ($response === false) {
-            Log::error('Trade latestTicker request failed', [
-                'currency' => $request->currency,
-                'url' => $url,
-                'curl_error' => $curlError,
-                'http_code' => $statusCode,
-            ]);
-            curl_close($curl);
-
-            return response()->json([]);
-        }
-
-        $result = json_decode($response);
-
-        if (!isset($result->Data->Data) || !is_array($result->Data->Data)) {
-            Log::warning('Trade latestTicker returned unexpected payload', [
-                'currency' => $request->currency,
-                'url' => $url,
-                'http_code' => $statusCode,
-                'response' => $response,
-            ]);
-            curl_close($curl);
-
-            return response()->json([]);
-        }
-
-        $hvoc = $result->Data->Data;
-
         $chartData = [];
 
-        foreach ($hvoc as $key => $value) {
+        foreach ($this->buildSyntheticCandles($request->currency) as $key => $value) {
             $chartData[$key] = [
-                'x' => $value->time,
-                'y' => [$value->open, $value->high, $value->low, $value->close]
+                'time' => $value['time'],
+                'open' => $value['open'],
+                'high' => $value['high'],
+                'low' => $value['low'],
+                'close' => $value['close'],
+                'x' => $value['time'],
+                'y' => [$value['open'], $value['high'], $value['low'], $value['close']]
             ];
         }
-
-        curl_close($curl);
 
         return response()->json($chartData);
     }
 
     public function currentPrice(Request $request)
     {
-        $general = Helper::config();
-        $apiCurrency = $this->resolveApiCurrencySymbol($request->currency);
-        $url = "https://min-api.cryptocompare.com/data/price?fsym={$apiCurrency}&tsyms=USD&api_key=" . $general->crypto_api;
-
-        try {
-            $data = json_decode(file_get_contents($url), true);
-            $result = is_array($data) ? reset($data) : null;
-
-            if (!is_numeric($result)) {
-                Log::warning('Trade currentPrice returned invalid data', [
-                    'currency' => $request->currency,
-                    'url' => $url,
-                    'response' => $data,
-                ]);
-            }
-
-            return response()->json($result);
-        } catch (\Throwable $exception) {
-            Log::error('Trade currentPrice request failed', [
-                'currency' => $request->currency,
-                'url' => $url,
-                'message' => $exception->getMessage(),
-            ]);
-
-            return response()->json(null, 500);
-        }
+        return response()->json($this->syntheticSpotPrice($request->currency));
     }
 
     public function trades()
@@ -266,7 +196,7 @@ class CryptoTradeController extends Controller
                 continue;
             }
 
-            $currentPrice = $this->fetchCurrentPrice($trade->currency, $config->crypto_api);
+            $currentPrice = $this->fetchCurrentPrice($trade->currency);
 
             if ($currentPrice === null) {
                 Log::warning('Trade settlement skipped because current price is unavailable', [
@@ -375,34 +305,9 @@ class CryptoTradeController extends Controller
         ]);
     }
 
-    private function fetchCurrentPrice(string $currency, string $apiKey): ?float
+    private function fetchCurrentPrice(string $currency, ?string $apiKey = null): ?float
     {
-        $apiCurrency = $this->resolveApiCurrencySymbol($currency);
-        $url = "https://min-api.cryptocompare.com/data/price?fsym={$apiCurrency}&tsyms=USD&api_key={$apiKey}";
-
-        try {
-            $data = json_decode(file_get_contents($url), true);
-            $price = is_array($data) ? reset($data) : null;
-
-            if (! is_numeric($price)) {
-                Log::warning('Trade fetchCurrentPrice returned invalid payload', [
-                    'currency' => $currency,
-                    'url' => $url,
-                    'response' => $data,
-                ]);
-                return null;
-            }
-
-            return (float) $price;
-        } catch (\Throwable $exception) {
-            Log::error('Trade fetchCurrentPrice failed', [
-                'currency' => $currency,
-                'url' => $url,
-                'message' => $exception->getMessage(),
-            ]);
-
-            return null;
-        }
+        return $this->syntheticSpotPrice($currency);
     }
 
     private function determineMarketResult(string $tradeType, float $openPrice, float $closePrice): ?bool
@@ -484,5 +389,95 @@ class CryptoTradeController extends Controller
         }
 
         return $normalized;
+    }
+
+    private function buildSyntheticCandles(?string $currency, int $limit = 80, int $intervalSeconds = 60): array
+    {
+        $limit = max(1, min(300, $limit));
+        $currentBucket = intdiv(now()->timestamp, $intervalSeconds) * $intervalSeconds;
+        $startBucket = $currentBucket - (($limit - 1) * $intervalSeconds);
+        $candles = [];
+
+        for ($time = $startBucket; $time <= $currentBucket; $time += $intervalSeconds) {
+            $open = $this->syntheticSpotPriceAt($currency, $time - $intervalSeconds);
+            $close = $this->syntheticSpotPriceAt($currency, $time);
+            $mid = $this->syntheticSpotPriceAt($currency, $time - (int) ($intervalSeconds / 2));
+            $padding = $this->syntheticCandlePadding($currency, $time, $open, $close);
+
+            $candles[] = [
+                'time' => $time,
+                'open' => $open,
+                'high' => $this->roundMarketPrice(max($open, $close, $mid) + $padding),
+                'low' => $this->roundMarketPrice(max(0.00000001, min($open, $close, $mid) - $padding)),
+                'close' => $close,
+            ];
+        }
+
+        return $candles;
+    }
+
+    private function syntheticSpotPrice(?string $currency): float
+    {
+        return $this->syntheticSpotPriceAt($currency, now()->timestamp);
+    }
+
+    private function syntheticSpotPriceAt(?string $currency, int $timestamp): float
+    {
+        $symbol = $this->resolveApiCurrencySymbol($currency);
+        $base = $this->syntheticBasePrice($symbol);
+        $seed = $this->symbolSeed($symbol);
+
+        $drift = sin(($timestamp / 86400) + ($seed / 250)) * 0.012;
+        $longWave = sin(($timestamp / 3600) + ($seed / 1000)) * 0.018;
+        $mediumWave = sin(($timestamp / 240) + $seed) * 0.008;
+        $shortWave = cos(($timestamp / 35) + ($seed / 17)) * 0.002;
+        $price = $base * (1 + $drift + $longWave + $mediumWave + $shortWave);
+
+        return $this->roundMarketPrice(max(0.00000001, $price));
+    }
+
+    private function syntheticCandlePadding(?string $currency, int $timestamp, float $open, float $close): float
+    {
+        $symbol = $this->resolveApiCurrencySymbol($currency);
+        $base = $this->syntheticBasePrice($symbol);
+        $seed = $this->symbolSeed($symbol);
+        $movement = abs($close - $open);
+        $minimumRange = $base * 0.0012;
+        $rangeWave = 0.6 + abs(sin(($timestamp / 57) + $seed));
+
+        return max($movement * 0.35, $minimumRange) * $rangeWave;
+    }
+
+    private function syntheticBasePrice(string $symbol): float
+    {
+        $prices = [
+            'BTC' => 65000.0,
+            'ETH' => 3200.0,
+            'BNB' => 600.0,
+            'DOGE' => 0.15,
+            'LTC' => 85.0,
+            'XAUT' => 2350.0,
+            'BTS' => 0.01,
+        ];
+
+        return $prices[$symbol] ?? (10 + ($this->symbolSeed($symbol) % 1000));
+    }
+
+    private function symbolSeed(string $symbol): int
+    {
+        return (int) sprintf('%u', crc32($symbol));
+    }
+
+    private function roundMarketPrice(float $price): float
+    {
+        if ($price >= 1000) {
+            return round($price, 2);
+        }
+
+        if ($price >= 1) {
+            return round($price, 4);
+        }
+
+        return round($price, 8);
     }
 }

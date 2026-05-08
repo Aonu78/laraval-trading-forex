@@ -407,9 +407,9 @@
         .sp_card_body {
     background: #1a1a1a;
 }
-        #linechart .apexcharts-tooltip {
-            background-color: #220700 !important;
-            border: 1px solid rgba(255, 255, 255, 0.15)
+        #linechart {
+            height: 400px;
+            width: 100%;
         }
 
         .sp_trading_section {
@@ -460,7 +460,7 @@
 
 
 <?php $__env->startPush('external-script'); ?>
-    <script src="<?php echo e(Config::jsLib('frontend', 'lib/apex.min.js')); ?>"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startPush('script'); ?>
@@ -640,10 +640,31 @@ $('#tradeCircle').on('click', function () {
 
         }
 
+        function formatCandleData(data) {
+            return (data || []).map(function(candle) {
+                if (typeof candle.time !== 'undefined') {
+                    return {
+                        time: candle.time,
+                        open: Number(candle.open),
+                        high: Number(candle.high),
+                        low: Number(candle.low),
+                        close: Number(candle.close)
+                    };
+                }
+
+                return {
+                    time: candle.x,
+                    open: Number(candle.y[0]),
+                    high: Number(candle.y[1]),
+                    low: Number(candle.y[2]),
+                    close: Number(candle.y[3])
+                };
+            });
+        }
+
         function updateChart(data) {
-            chart.updateSeries([{
-                data: data
-            }]);
+            candleSeries.setData(formatCandleData(data));
+            chart.timeScale().fitContent();
         }
 
         setInterval(() => {
@@ -666,61 +687,52 @@ $('#tradeCircle').on('click', function () {
                     currency: currency
                 },
                 success: function(response) {
-                    chart.updateSeries([{
-                        data: response
-                    }]);
+                    updateChart(response);
 
                 }
             });
         }
 
-        var options = {
-            series: [{
-                data: cryptoPrice
-            }],
-            chart: {
-                type: 'candlestick',
-                height: 400
-            },
-            title: {
-                text: 'CandleStick Chart',
-                align: 'left',
-                style: {
-                    color: '#ffffff'
-                }
-            },
-            xaxis: {
-                type: 'datetime',
-                labels: {
-                    style: {
-                        colors: ['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff']
-                    }
-                }
-            },
-            yaxis: {
-                tooltip: {
-                    enabled: true
-                },
-                labels: {
-                    style: {
-                        colors: ['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff']
-                    }
-                }
+        const chartContainer = document.getElementById('linechart');
+        const chart = LightweightCharts.createChart(chartContainer, {
+            width: chartContainer.clientWidth,
+            height: 400,
+            layout: {
+                background: { color: '#1a1a1a' },
+                textColor: '#ffffff'
             },
             grid: {
-                show: true,
-                borderColor: '#ffffff26',
-                strokeDashArray: 0,
-                yaxis: {
-                    lines: {
-                        show: true
-                    }
-                }
+                vertLines: { color: '#ffffff26' },
+                horzLines: { color: '#ffffff26' }
+            },
+            timeScale: {
+                timeVisible: true,
+                secondsVisible: false,
+                borderColor: '#ffffff26'
+            },
+            rightPriceScale: {
+                borderColor: '#ffffff26'
             }
-        };
+        });
+        const candleSeries = chart.addSeries
+            ? chart.addSeries(LightweightCharts.CandlestickSeries, {
+                upColor: '#26a69a',
+                downColor: '#ef5350',
+                borderVisible: false,
+                wickUpColor: '#26a69a',
+                wickDownColor: '#ef5350'
+            })
+            : chart.addCandlestickSeries({
+                upColor: '#26a69a',
+                downColor: '#ef5350',
+                borderVisible: false,
+                wickUpColor: '#26a69a',
+                wickDownColor: '#ef5350'
+            });
 
-        var chart = new ApexCharts(document.querySelector("#linechart"), options);
-        chart.render();
+        window.addEventListener('resize', function() {
+            chart.applyOptions({ width: chartContainer.clientWidth });
+        });
 
 
         const orderBalance = parseFloat('<?php echo e(auth()->user()->balance); ?>') || 0;

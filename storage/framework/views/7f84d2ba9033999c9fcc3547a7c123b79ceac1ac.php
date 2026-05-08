@@ -10,10 +10,13 @@
             <i class="las la-envelope"></i>
         </div>
         <label><?php echo e(__('Password')); ?></label>
-        <div class="sp_input_icon_field mb-3">
+        <div class="sp_input_icon_field password-field mb-3">
             <input type="password" class="form-control" name="password" id="password"
                 placeholder="<?php echo e(__('Enter Password')); ?>">
             <i class="las la-lock"></i>
+            <button type="button" class="password-toggle" id="togglePassword" aria-label="<?php echo e(__('Show password')); ?>">
+                <i class="las la-eye"></i>
+            </button>
         </div>
 
         <?php if(Config::config()->allow_recaptcha == 1): ?>
@@ -64,9 +67,50 @@
     </form>
 <?php $__env->stopSection(); ?>
 
+<?php $__env->startPush('external-css'); ?>
+    <style>
+        .password-field .form-control {
+            padding-right: 2.8125rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 45px;
+            height: 100%;
+            border: 0;
+            background: transparent;
+            color: #c3c1c1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .password-toggle i {
+            position: static;
+            width: auto;
+            font-size: 1.5rem;
+        }
+    </style>
+<?php $__env->stopPush(); ?>
+
 <?php $__env->startPush('script'); ?>
     <script>
         "use strict";
+
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        if (togglePassword && password) {
+            togglePassword.addEventListener('click', function() {
+                const isPassword = password.getAttribute('type') === 'password';
+                password.setAttribute('type', isPassword ? 'text' : 'password');
+                this.setAttribute('aria-label', isPassword ? '<?php echo e(__('Hide password')); ?>' : '<?php echo e(__('Show password')); ?>');
+                this.querySelector('i').classList.toggle('la-eye-slash', isPassword);
+            });
+        }
 
         function submitUserForm() {
             var response = grecaptcha.getResponse();
