@@ -18,7 +18,9 @@ class User extends Authenticatable
         'trade_profit_percent' => 'integer',
         'credit_score' => 'integer',
         'is_banned' => 'boolean',
-        'is_account_freeze' => 'boolean'
+        'is_account_freeze' => 'boolean',
+        'is_withdraw_blocked' => 'boolean',
+        'is_trade_blocked' => 'boolean'
     ];
 
 

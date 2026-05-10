@@ -37,6 +37,10 @@ $data['withdraws'] = WithdrawGateway::where('status', 1)->latest()->get();
 
         $isSuccess = $this->withdrawservice->makeWithdraw($request);
 
+        if($isSuccess['type'] === 'blocked'){
+            return redirect()->back();
+        }
+
         if($isSuccess['type'] === 'error'){
             return redirect()->back()->with('error', $isSuccess['message']);
         }

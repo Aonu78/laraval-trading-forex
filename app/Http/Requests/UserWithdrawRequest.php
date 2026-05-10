@@ -23,6 +23,10 @@ class UserWithdrawRequest extends FormRequest
      */
     public function rules()
     {
+        if (optional($this->user())->is_withdraw_blocked) {
+            return [];
+        }
+
         return [
             'method' => 'required|integer',
             'amount' => 'required|numeric',

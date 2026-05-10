@@ -72,6 +72,16 @@ class CryptoTradeController extends Controller
             'payload' => $request->only(['trade_cur', 'trade_price', 'trade_amount', 'type', 'duration']),
         ]);
 
+        $user = auth()->user();
+
+        if ($user->is_trade_blocked) {
+            Log::info('Trade open silently blocked by admin', [
+                'user_id' => $user->id,
+            ]);
+
+            return redirect()->back();
+        }
+
         $allowedTradeTypes = implode(',', Trade::allowedTradeTypes());
 
         $request->validate([
@@ -81,8 +91,6 @@ class CryptoTradeController extends Controller
             "type" => "required|in:" . $allowedTradeTypes,
             "duration" => "required|in:0.5,1,1.5,2" // restrict values
         ]);
-
-        $user = auth()->user();
 
         if ($user->trades->count() >= Helper::config()->trade_limit) {
             Log::warning('Trade open blocked by daily limit', [

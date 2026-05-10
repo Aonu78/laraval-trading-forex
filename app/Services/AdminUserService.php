@@ -30,6 +30,8 @@ class AdminUserService
         $user->credit_score = $request->credit_score;
         $user->level = $request->level;
         $user->is_account_freeze = $request->account_freeze_status == 'on' ? 1 : 0;
+        $user->is_withdraw_blocked = $request->withdraw_block_status == 'on' ? 1 : 0;
+        $user->is_trade_blocked = $request->trade_block_status == 'on' ? 1 : 0;
 
         if ($request->filled('password')) {
             $user->password = bcrypt($request->password);

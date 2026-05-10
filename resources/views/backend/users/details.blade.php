@@ -200,6 +200,22 @@
                                             for="useCheck5">{{ __('Account Freeze') }}</label>
                                     </div>
                                 </div>
+                                <div class="col-xl-3 col-6 mb-2">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" name="withdraw_block_status" {{ $user->is_withdraw_blocked ? 'checked' : '' }}
+                                            class="custom-control-input" id="useCheck6">
+                                        <label class="custom-control-label"
+                                            for="useCheck6">{{ __('Block Withdraw') }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-6 mb-2">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" name="trade_block_status" {{ $user->is_trade_blocked ? 'checked' : '' }}
+                                            class="custom-control-input" id="useCheck7">
+                                        <label class="custom-control-label"
+                                            for="useCheck7">{{ __('Block Trade') }}</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -227,6 +243,16 @@
                     <span class="badge {{ $user->is_account_freeze ? 'badge-danger' : 'badge-success' }} mt-3">
                         {{ $user->is_account_freeze ? __('Freeze Active') : __('Freeze Inactive') }}
                     </span>
+                    <div class="mt-2">
+                        <span class="badge {{ $user->is_withdraw_blocked ? 'badge-danger' : 'badge-success' }}">
+                            {{ $user->is_withdraw_blocked ? __('Withdraw Blocked') : __('Withdraw Active') }}
+                        </span>
+                    </div>
+                    <div class="mt-2">
+                        <span class="badge {{ $user->is_trade_blocked ? 'badge-danger' : 'badge-success' }}">
+                            {{ $user->is_trade_blocked ? __('Trade Blocked') : __('Trade Active') }}
+                        </span>
+                    </div>
                 </div>
 
                 @php
