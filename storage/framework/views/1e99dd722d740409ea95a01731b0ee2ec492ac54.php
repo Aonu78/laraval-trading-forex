@@ -151,6 +151,7 @@
         let reconnectTimer = null;
         let activeBinanceSymbol = null;
         let chartRequestId = 0;
+        const unavailableText = <?php echo json_encode(__('Unavailable'), 15, 512) ?>;
 
         $('.currency').on('click', function() {
             currency = $(this).val();
@@ -211,7 +212,7 @@
             const formattedPrice = formatMarketPrice(price);
 
             if (!formattedPrice) {
-                $('#currentPrice').text('<?php echo e(__('Unavailable')); ?> (' + selectedPairLabel() + ')');
+                $('#currentPrice').text(unavailableText + ' (' + selectedPairLabel() + ')');
                 $('input[name=trade_price]').val('');
                 return;
             }
@@ -310,13 +311,14 @@
             }
 
             activeBinanceSymbol = symbol;
-            binanceSocket = new WebSocket('wss://stream.binance.com:9443/ws/' + symbol.toLowerCase() + '@kline_1m');
+            const socket = new WebSocket('wss://stream.binance.com:9443/ws/' + symbol.toLowerCase() + '@kline_1m');
+            binanceSocket = socket;
 
-            binanceSocket.onmessage = function(event) {
+            socket.onmessage = function(event) {
                 const payload = JSON.parse(event.data);
                 const kline = payload.k;
 
-                if (!kline || payload.s !== activeBinanceSymbol) {
+                if (socket !== binanceSocket || !kline || payload.s !== activeBinanceSymbol) {
                     return;
                 }
 
@@ -330,12 +332,12 @@
                 updateCurrentPrice(kline.c);
             };
 
-            binanceSocket.onerror = function() {
-                binanceSocket.close();
+            socket.onerror = function() {
+                socket.close();
             };
 
-            binanceSocket.onclose = function() {
-                if (activeBinanceSymbol !== symbol) {
+            socket.onclose = function() {
+                if (socket !== binanceSocket || activeBinanceSymbol !== symbol) {
                     return;
                 }
 
@@ -353,10 +355,6 @@
             currentPrice(currency);
             connectBinanceSocket(symbol);
         }
-
-        $(window).on("load", function() {
-            loadLiveMarket(currency);
-        });
 
         const chartContainer = document.getElementById('linechart');
         const chart = LightweightCharts.createChart(chartContainer, {
@@ -398,6 +396,8 @@
         window.addEventListener('resize', function() {
             chart.applyOptions({ width: chartContainer.clientWidth });
         });
+
+        loadLiveMarket(currency);
 
 
         $('.order').on('click', function() {

@@ -341,80 +341,98 @@ class CryptoTradeController extends Controller
 
     private function fetchBinancePrice(string $symbol): ?float
     {
-        try {
-            $response = Http::timeout(5)
-                ->get('https://api.binance.com/api/v3/ticker/price', [
+        foreach ($this->binanceRestEndpoints() as $endpoint) {
+            try {
+                $response = Http::timeout(5)
+                    ->get($endpoint . '/api/v3/ticker/price', [
                     'symbol' => $symbol,
                 ]);
 
-            if (! $response->successful()) {
-                Log::warning('Binance price request failed', [
-                    'symbol' => $symbol,
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ]);
+                if (! $response->successful()) {
+                    Log::warning('Binance price request failed', [
+                        'endpoint' => $endpoint,
+                        'symbol' => $symbol,
+                        'status' => $response->status(),
+                        'body' => $response->body(),
+                    ]);
 
-                return null;
+                    continue;
+                }
+
+                $price = (float) $response->json('price');
+
+                if ($price > 0) {
+                    return $this->roundMarketPrice($price);
+                }
+            } catch (\Throwable $exception) {
+                Log::warning('Binance price request exception', [
+                    'endpoint' => $endpoint,
+                    'symbol' => $symbol,
+                    'message' => $exception->getMessage(),
+                ]);
             }
-
-            $price = (float) $response->json('price');
-
-            return $price > 0 ? $this->roundMarketPrice($price) : null;
-        } catch (\Throwable $exception) {
-            Log::warning('Binance price request exception', [
-                'symbol' => $symbol,
-                'message' => $exception->getMessage(),
-            ]);
-
-            return null;
         }
+
+        return null;
     }
 
     private function fetchBinanceCandles(string $symbol, string $interval = '1m', int $limit = 80): ?array
     {
-        try {
-            $response = Http::timeout(8)
-                ->get('https://api.binance.com/api/v3/klines', [
+        foreach ($this->binanceRestEndpoints() as $endpoint) {
+            try {
+                $response = Http::timeout(8)
+                    ->get($endpoint . '/api/v3/klines', [
                     'symbol' => $symbol,
                     'interval' => $interval,
                     'limit' => max(1, min(300, $limit)),
                 ]);
 
-            if (! $response->successful()) {
-                Log::warning('Binance candles request failed', [
+                if (! $response->successful()) {
+                    Log::warning('Binance candles request failed', [
+                        'endpoint' => $endpoint,
+                        'symbol' => $symbol,
+                        'status' => $response->status(),
+                        'body' => $response->body(),
+                    ]);
+
+                    continue;
+                }
+
+                return collect($response->json())->map(function ($candle) {
+                    $time = (int) floor(((int) $candle[0]) / 1000);
+                    $open = $this->roundMarketPrice((float) $candle[1]);
+                    $high = $this->roundMarketPrice((float) $candle[2]);
+                    $low = $this->roundMarketPrice((float) $candle[3]);
+                    $close = $this->roundMarketPrice((float) $candle[4]);
+
+                    return [
+                        'time' => $time,
+                        'open' => $open,
+                        'high' => $high,
+                        'low' => $low,
+                        'close' => $close,
+                        'x' => $time,
+                        'y' => [$open, $high, $low, $close],
+                    ];
+                })->values()->all();
+            } catch (\Throwable $exception) {
+                Log::warning('Binance candles request exception', [
+                    'endpoint' => $endpoint,
                     'symbol' => $symbol,
-                    'status' => $response->status(),
-                    'body' => $response->body(),
+                    'message' => $exception->getMessage(),
                 ]);
-
-                return null;
             }
-
-            return collect($response->json())->map(function ($candle) {
-                $time = (int) floor(((int) $candle[0]) / 1000);
-                $open = $this->roundMarketPrice((float) $candle[1]);
-                $high = $this->roundMarketPrice((float) $candle[2]);
-                $low = $this->roundMarketPrice((float) $candle[3]);
-                $close = $this->roundMarketPrice((float) $candle[4]);
-
-                return [
-                    'time' => $time,
-                    'open' => $open,
-                    'high' => $high,
-                    'low' => $low,
-                    'close' => $close,
-                    'x' => $time,
-                    'y' => [$open, $high, $low, $close],
-                ];
-            })->values()->all();
-        } catch (\Throwable $exception) {
-            Log::warning('Binance candles request exception', [
-                'symbol' => $symbol,
-                'message' => $exception->getMessage(),
-            ]);
-
-            return null;
         }
+
+        return null;
+    }
+
+    private function binanceRestEndpoints(): array
+    {
+        return [
+            'https://data-api.binance.vision',
+            'https://api.binance.com',
+        ];
     }
 
     private function determineMarketResult(string $tradeType, float $openPrice, float $closePrice): ?bool

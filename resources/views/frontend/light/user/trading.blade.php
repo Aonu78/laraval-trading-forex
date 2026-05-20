@@ -751,7 +751,7 @@ $('#tradeCircle').on('click', function () {
             }
 
             activeBinanceSymbol = symbol;
-            const socket = new WebSocket('wss://stream.binance.com:9443/ws/' + symbol.toLowerCase() + '@kline_1m');
+            const socket = new WebSocket('wss://data-stream.binance.vision:443/ws/' + symbol.toLowerCase() + '@kline_1m');
             binanceSocket = socket;
 
             socket.onmessage = function(event) {
