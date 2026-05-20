@@ -8,6 +8,7 @@ use App\Models\Trade;
 use App\Models\Transaction;
 use App\Notifications\TradeCreatedNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -33,18 +34,16 @@ class CryptoTradeController extends Controller
 
     public function latestTicker(Request $request)
     {
-        $chartData = [];
+        $symbol = $this->resolveBinanceSymbol($request->currency);
 
-        foreach ($this->buildSyntheticCandles($request->currency) as $key => $value) {
-            $chartData[$key] = [
-                'time' => $value['time'],
-                'open' => $value['open'],
-                'high' => $value['high'],
-                'low' => $value['low'],
-                'close' => $value['close'],
-                'x' => $value['time'],
-                'y' => [$value['open'], $value['high'], $value['low'], $value['close']]
-            ];
+        if ($symbol === null) {
+            return response()->json(['message' => 'Unsupported live market symbol.'], 422);
+        }
+
+        $chartData = $this->fetchBinanceCandles($symbol);
+
+        if ($chartData === null) {
+            return response()->json(['message' => 'Live market candles are unavailable.'], 502);
         }
 
         return response()->json($chartData);
@@ -52,7 +51,13 @@ class CryptoTradeController extends Controller
 
     public function currentPrice(Request $request)
     {
-        return response()->json($this->syntheticSpotPrice($request->currency));
+        $price = $this->fetchCurrentPrice((string) $request->currency);
+
+        if ($price === null) {
+            return response()->json(['message' => 'Live market price is unavailable.'], 502);
+        }
+
+        return response()->json($price);
     }
 
     public function trades()
@@ -86,7 +91,7 @@ class CryptoTradeController extends Controller
 
         $request->validate([
             "trade_cur" => "required",
-            "trade_price" => "required",
+            "trade_price" => "nullable|numeric",
             "trade_amount" => "required|numeric|gt:0",
             "type" => "required|in:" . $allowedTradeTypes,
             "duration" => "required|in:0.5,1,1.5,2" // restrict values
@@ -123,13 +128,23 @@ class CryptoTradeController extends Controller
         $durationInSeconds = $request->duration * 60;
         $isFirstTrade = ! Trade::where('user_id', $user->id)->exists();
         $stakeAmount = (float) $request->trade_amount;
+        $openPrice = $this->fetchCurrentPrice((string) $request->trade_cur);
+
+        if ($openPrice === null) {
+            Log::warning('Trade open blocked because live price is unavailable', [
+                'user_id' => $user->id,
+                'currency' => $request->trade_cur,
+            ]);
+
+            return redirect()->back()->with('error', 'Live market price is unavailable for this pair');
+        }
 
         $ref = Str::random(16);
         $tradePayload = [
             'ref' => $ref,
             'user_id' => auth()->id(),
             'currency' => $request->trade_cur,
-            'current_price' => $request->trade_price,
+            'current_price' => $openPrice,
             'trade_amount' => $request->trade_amount,
             'trade_type' => Trade::normalizeTradeType($request->type),
             'result_mode' => $isFirstTrade ? Trade::RESULT_MODE_FORCE_WIN : Trade::RESULT_MODE_DEFAULT,
@@ -315,7 +330,91 @@ class CryptoTradeController extends Controller
 
     private function fetchCurrentPrice(string $currency, ?string $apiKey = null): ?float
     {
-        return $this->syntheticSpotPrice($currency);
+        $symbol = $this->resolveBinanceSymbol($currency);
+
+        if ($symbol === null) {
+            return null;
+        }
+
+        return $this->fetchBinancePrice($symbol);
+    }
+
+    private function fetchBinancePrice(string $symbol): ?float
+    {
+        try {
+            $response = Http::timeout(5)
+                ->get('https://api.binance.com/api/v3/ticker/price', [
+                    'symbol' => $symbol,
+                ]);
+
+            if (! $response->successful()) {
+                Log::warning('Binance price request failed', [
+                    'symbol' => $symbol,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                return null;
+            }
+
+            $price = (float) $response->json('price');
+
+            return $price > 0 ? $this->roundMarketPrice($price) : null;
+        } catch (\Throwable $exception) {
+            Log::warning('Binance price request exception', [
+                'symbol' => $symbol,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    private function fetchBinanceCandles(string $symbol, string $interval = '1m', int $limit = 80): ?array
+    {
+        try {
+            $response = Http::timeout(8)
+                ->get('https://api.binance.com/api/v3/klines', [
+                    'symbol' => $symbol,
+                    'interval' => $interval,
+                    'limit' => max(1, min(300, $limit)),
+                ]);
+
+            if (! $response->successful()) {
+                Log::warning('Binance candles request failed', [
+                    'symbol' => $symbol,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                return null;
+            }
+
+            return collect($response->json())->map(function ($candle) {
+                $time = (int) floor(((int) $candle[0]) / 1000);
+                $open = $this->roundMarketPrice((float) $candle[1]);
+                $high = $this->roundMarketPrice((float) $candle[2]);
+                $low = $this->roundMarketPrice((float) $candle[3]);
+                $close = $this->roundMarketPrice((float) $candle[4]);
+
+                return [
+                    'time' => $time,
+                    'open' => $open,
+                    'high' => $high,
+                    'low' => $low,
+                    'close' => $close,
+                    'x' => $time,
+                    'y' => [$open, $high, $low, $close],
+                ];
+            })->values()->all();
+        } catch (\Throwable $exception) {
+            Log::warning('Binance candles request exception', [
+                'symbol' => $symbol,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     private function determineMarketResult(string $tradeType, float $openPrice, float $closePrice): ?bool
@@ -384,96 +483,37 @@ class CryptoTradeController extends Controller
         return $shouldWin ? $marketResult : ! $marketResult;
     }
 
-    private function resolveApiCurrencySymbol(?string $currency): string
+    private function resolveBinanceSymbol(?string $currency): ?string
     {
-        $normalized = strtoupper((string) $currency);
+        $normalized = strtoupper(trim((string) $currency));
+        $normalized = str_replace(['/', '-'], '_', $normalized);
 
-        if (str_contains($normalized, '_')) {
-            return explode('_', $normalized)[0];
-        }
-
-        if (str_contains($normalized, '/')) {
-            return explode('/', $normalized)[0];
-        }
-
-        return $normalized;
-    }
-
-    private function buildSyntheticCandles(?string $currency, int $limit = 80, int $intervalSeconds = 60): array
-    {
-        $limit = max(1, min(300, $limit));
-        $currentBucket = intdiv(now()->timestamp, $intervalSeconds) * $intervalSeconds;
-        $startBucket = $currentBucket - (($limit - 1) * $intervalSeconds);
-        $candles = [];
-
-        for ($time = $startBucket; $time <= $currentBucket; $time += $intervalSeconds) {
-            $open = $this->syntheticSpotPriceAt($currency, $time - $intervalSeconds);
-            $close = $this->syntheticSpotPriceAt($currency, $time);
-            $mid = $this->syntheticSpotPriceAt($currency, $time - (int) ($intervalSeconds / 2));
-            $padding = $this->syntheticCandlePadding($currency, $time, $open, $close);
-
-            $candles[] = [
-                'time' => $time,
-                'open' => $open,
-                'high' => $this->roundMarketPrice(max($open, $close, $mid) + $padding),
-                'low' => $this->roundMarketPrice(max(0.00000001, min($open, $close, $mid) - $padding)),
-                'close' => $close,
-            ];
-        }
-
-        return $candles;
-    }
-
-    private function syntheticSpotPrice(?string $currency): float
-    {
-        return $this->syntheticSpotPriceAt($currency, now()->timestamp);
-    }
-
-    private function syntheticSpotPriceAt(?string $currency, int $timestamp): float
-    {
-        $symbol = $this->resolveApiCurrencySymbol($currency);
-        $base = $this->syntheticBasePrice($symbol);
-        $seed = $this->symbolSeed($symbol);
-
-        $drift = sin(($timestamp / 86400) + ($seed / 250)) * 0.012;
-        $longWave = sin(($timestamp / 3600) + ($seed / 1000)) * 0.018;
-        $mediumWave = sin(($timestamp / 240) + $seed) * 0.008;
-        $shortWave = cos(($timestamp / 35) + ($seed / 17)) * 0.002;
-        $price = $base * (1 + $drift + $longWave + $mediumWave + $shortWave);
-
-        return $this->roundMarketPrice(max(0.00000001, $price));
-    }
-
-    private function syntheticCandlePadding(?string $currency, int $timestamp, float $open, float $close): float
-    {
-        $symbol = $this->resolveApiCurrencySymbol($currency);
-        $base = $this->syntheticBasePrice($symbol);
-        $seed = $this->symbolSeed($symbol);
-        $movement = abs($close - $open);
-        $minimumRange = $base * 0.0012;
-        $rangeWave = 0.6 + abs(sin(($timestamp / 57) + $seed));
-
-        return max($movement * 0.35, $minimumRange) * $rangeWave;
-    }
-
-    private function syntheticBasePrice(string $symbol): float
-    {
-        $prices = [
-            'BTC' => 65000.0,
-            'ETH' => 3200.0,
-            'BNB' => 600.0,
-            'DOGE' => 0.15,
-            'LTC' => 85.0,
-            'XAUT' => 2350.0,
-            'BTS' => 0.01,
+        $aliases = [
+            'BTC' => 'BTC_USDT',
+            'ETH' => 'ETH_USDT',
+            'BNB' => 'BNB_USDT',
+            'DOGE' => 'DOGE_USDT',
+            'LTC' => 'LTC_USDT',
+            'DASH' => 'DASH_USDT',
+            'ETC' => 'ETC_USDT',
+            'BCH' => 'BCH_USDT',
         ];
 
-        return $prices[$symbol] ?? (10 + ($this->symbolSeed($symbol) % 1000));
-    }
+        $normalized = $aliases[$normalized] ?? $normalized;
 
-    private function symbolSeed(string $symbol): int
-    {
-        return (int) sprintf('%u', crc32($symbol));
+        if (! str_contains($normalized, '_')) {
+            $normalized .= '_USDT';
+        }
+
+        [$base, $quote] = array_pad(explode('_', $normalized, 2), 2, null);
+
+        if (! $base || ! $quote || $base === $quote) {
+            return null;
+        }
+
+        $symbol = $base . $quote;
+
+        return preg_match('/^[A-Z0-9]+$/', $symbol) ? $symbol : null;
     }
 
     private function roundMarketPrice(float $price): float

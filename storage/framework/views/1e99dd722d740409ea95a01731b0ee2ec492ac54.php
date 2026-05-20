@@ -19,81 +19,81 @@
                 <div class="radio_button_list">
                     <div class="sp_site_radio">
                         <input type="radio" class="form-check-input currency" id="trad-1" name="currency"
-                            value="BTC" checked>
+                            value="BTC" data-pair="BTC/USDT" checked>
                         <label class="form-check-label" for="trad-1">
-                            <?php echo e(__('BTC')); ?>
+                            <?php echo e(__('BTC/USDT')); ?>
 
                         </label>
                     </div>
 
                     <div class="sp_site_radio">
                         <input type="radio" class="form-check-input currency" id="trad-2" name="currency"
-                            value="ETH">
+                            value="ETH" data-pair="ETH/USDT">
                         <label class="form-check-label" for="trad-2">
-                            <?php echo e(__('ETH')); ?>
+                            <?php echo e(__('ETH/USDT')); ?>
 
                         </label>
                     </div>
 
                     <div class="sp_site_radio">
                         <input type="radio" class="form-check-input currency" id="trad-3" name="currency"
-                            value="USDT">
+                            value="ETH_USDC" data-pair="ETH/USDC">
                         <label class="form-check-label" for="trad-3">
-                            <?php echo e(__('USDT')); ?>
+                            <?php echo e(__('ETH/USDC')); ?>
 
                         </label>
                     </div>
 
                     <div class="sp_site_radio">
                         <input type="radio" class="form-check-input currency" id="trad-4" name="currency"
-                            value="BNB">
+                            value="BNB" data-pair="BNB/USDT">
                         <label class="form-check-label" for="trad-4">
-                            <?php echo e(__('BNB')); ?>
+                            <?php echo e(__('BNB/USDT')); ?>
 
                         </label>
                     </div>
 
                     <div class="sp_site_radio">
                         <input type="radio" class="form-check-input currency" id="trad-5" name="currency"
-                            value="DOGE">
+                            value="DOGE" data-pair="DOGE/USDT">
                         <label class="form-check-label" for="trad-5">
-                            <?php echo e(__('DOGE')); ?>
+                            <?php echo e(__('DOGE/USDT')); ?>
 
                         </label>
                     </div>
 
                     <div class="sp_site_radio">
                         <input type="radio" class="form-check-input currency" id="trad-6" name="currency"
-                            value="LTC">
+                            value="LTC" data-pair="LTC/USDT">
                         <label class="form-check-label" for="trad-6">
-                            <?php echo e(__('LTC')); ?>
+                            <?php echo e(__('LTC/USDT')); ?>
 
                         </label>
                     </div>
 
                     <div class="sp_site_radio">
                         <input type="radio" class="form-check-input currency" id="trad-7" name="currency"
-                            value="DASH">
+                            value="DASH" data-pair="DASH/USDT">
                         <label class="form-check-label" for="trad-7">
-                            <?php echo e(__('DASH')); ?>
+                            <?php echo e(__('DASH/USDT')); ?>
 
                         </label>
                     </div>
 
                     <div class="sp_site_radio">
                         <input type="radio" class="form-check-input currency" id="trad-8" name="currency"
-                            value="ETC">
+                            value="ETC" data-pair="ETC/USDT">
                         <label class="form-check-label" for="trad-8">
-                            <?php echo e(__('ETC')); ?>
+                            <?php echo e(__('ETC/USDT')); ?>
 
                         </label>
                     </div>
 
                     <div class="sp_site_radio">
                         <input type="radio" class="form-check-input currency" id="trad-9" name="currency"
-                            value="BCH">
+                            value="BCH" data-pair="BCH/USDT">
                         <label class="form-check-label" for="trad-9">
-                            <?php echo e(__('BCH')); ?>
+                            <?php echo e(__('BCH/USDT')); ?>
 
                         </label>
                     </div>
@@ -146,17 +146,80 @@
         'use strict'
 
 
-        let cryptoPrice;
-
         let currency = $("input[name='currency']:checked").val();
+        let binanceSocket = null;
+        let reconnectTimer = null;
+        let activeBinanceSymbol = null;
+        let chartRequestId = 0;
 
-        $('.currency').each(function(index) {
-            $('.currency').eq(index).on('click', function() {
-                currency = $(this).val();
-                fetchCryptocurrencyPrices(currency);
-                currentPrice(currency)
-            })
-        })
+        $('.currency').on('click', function() {
+            currency = $(this).val();
+            loadLiveMarket(currency);
+        });
+
+        function selectedPairLabel() {
+            return $("input[name='currency']:checked").data('pair') || currency;
+        }
+
+        function binanceSymbolFromCurrency(currency) {
+            let normalized = String(currency || '').trim().toUpperCase().replace(/[\/-]/g, '_');
+            const aliases = {
+                BTC: 'BTC_USDT',
+                ETH: 'ETH_USDT',
+                BNB: 'BNB_USDT',
+                DOGE: 'DOGE_USDT',
+                LTC: 'LTC_USDT',
+                DASH: 'DASH_USDT',
+                ETC: 'ETC_USDT',
+                BCH: 'BCH_USDT'
+            };
+
+            normalized = aliases[normalized] || normalized;
+
+            if (!normalized.includes('_')) {
+                normalized += '_USDT';
+            }
+
+            const parts = normalized.split('_');
+
+            if (parts.length < 2 || parts[0] === parts[1]) {
+                return null;
+            }
+
+            return (parts[0] + parts[1]).replace(/[^A-Z0-9]/g, '');
+        }
+
+        function formatMarketPrice(price) {
+            const value = Number(price);
+
+            if (!Number.isFinite(value)) {
+                return '';
+            }
+
+            if (value >= 1000) {
+                return value.toFixed(2);
+            }
+
+            if (value >= 1) {
+                return value.toFixed(4);
+            }
+
+            return value.toFixed(8);
+        }
+
+        function updateCurrentPrice(price) {
+            const formattedPrice = formatMarketPrice(price);
+
+            if (!formattedPrice) {
+                $('#currentPrice').text('<?php echo e(__('Unavailable')); ?> (' + selectedPairLabel() + ')');
+                $('input[name=trade_price]').val('');
+                return;
+            }
+
+            $('#currentPrice').text(formattedPrice + ' (' + selectedPairLabel() + ')');
+            $('input[name=trade_cur]').val(currency);
+            $('input[name=trade_price]').val(formattedPrice);
+        }
 
         function currentPrice(currency) {
 
@@ -167,9 +230,10 @@
                     currency: currency
                 },
                 success: function(response) {
-                    $('#currentPrice').text('Current Price ' + response + '(' + currency + ')')
-                    $('input[name=trade_cur]').val(currency)
-                    $('input[name=trade_price]').val(response)
+                    updateCurrentPrice(response);
+                },
+                error: function() {
+                    updateCurrentPrice(null);
                 }
             });
 
@@ -202,19 +266,9 @@
             chart.timeScale().fitContent();
         }
 
-        setInterval(() => {
-            fetchCryptocurrencyPrices(currency);
-            currentPrice(currency);
-        }, 5000);
-
-
-        $(window).on("load", function() {
-            fetchCryptocurrencyPrices(currency);
-            currentPrice(currency);
-        });
-
-
         function fetchCryptocurrencyPrices(currency) {
+            const requestId = ++chartRequestId;
+
             $.ajax({
                 url: "<?php echo e(route('ticker')); ?>",
                 method: "GET",
@@ -222,11 +276,87 @@
                     currency: currency
                 },
                 success: function(response) {
-                    updateChart(response);
+                    if (requestId !== chartRequestId) {
+                        return;
+                    }
 
+                    updateChart(response);
+                },
+                error: function() {
+                    if (requestId === chartRequestId) {
+                        candleSeries.setData([]);
+                    }
                 }
             });
         }
+
+        function closeBinanceSocket() {
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+
+            if (binanceSocket) {
+                binanceSocket.onclose = null;
+                binanceSocket.close();
+                binanceSocket = null;
+            }
+        }
+
+        function connectBinanceSocket(symbol) {
+            if (!symbol) {
+                updateCurrentPrice(null);
+                return;
+            }
+
+            activeBinanceSymbol = symbol;
+            binanceSocket = new WebSocket('wss://stream.binance.com:9443/ws/' + symbol.toLowerCase() + '@kline_1m');
+
+            binanceSocket.onmessage = function(event) {
+                const payload = JSON.parse(event.data);
+                const kline = payload.k;
+
+                if (!kline || payload.s !== activeBinanceSymbol) {
+                    return;
+                }
+
+                candleSeries.update({
+                    time: Math.floor(kline.t / 1000),
+                    open: Number(kline.o),
+                    high: Number(kline.h),
+                    low: Number(kline.l),
+                    close: Number(kline.c)
+                });
+                updateCurrentPrice(kline.c);
+            };
+
+            binanceSocket.onerror = function() {
+                binanceSocket.close();
+            };
+
+            binanceSocket.onclose = function() {
+                if (activeBinanceSymbol !== symbol) {
+                    return;
+                }
+
+                reconnectTimer = setTimeout(function() {
+                    connectBinanceSocket(symbol);
+                }, 3000);
+            };
+        }
+
+        function loadLiveMarket(currency) {
+            const symbol = binanceSymbolFromCurrency(currency);
+
+            closeBinanceSocket();
+            fetchCryptocurrencyPrices(currency);
+            currentPrice(currency);
+            connectBinanceSocket(symbol);
+        }
+
+        $(window).on("load", function() {
+            loadLiveMarket(currency);
+        });
 
         const chartContainer = document.getElementById('linechart');
         const chart = LightweightCharts.createChart(chartContainer, {
