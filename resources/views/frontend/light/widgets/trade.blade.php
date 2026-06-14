@@ -88,6 +88,14 @@
                             {{ __('BCH/USDT') }}
                         </label>
                     </div>
+
+                    <div class="sp_site_radio">
+                        <input type="radio" class="form-check-input currency" id="trad-10" name="currency"
+                            value="BTS" data-pair="BTS/USDT">
+                        <label class="form-check-label" for="trad-10">
+                            {{ __('BTS/USDT') }}
+                        </label>
+                    </div>
                 </div>
 
                 <div>
@@ -163,7 +171,8 @@
                 LTC: 'LTC_USDT',
                 DASH: 'DASH_USDT',
                 ETC: 'ETC_USDT',
-                BCH: 'BCH_USDT'
+                BCH: 'BCH_USDT',
+                BTS: 'BTS_USDT'
             };
 
             normalized = aliases[normalized] || normalized;

@@ -515,6 +515,7 @@ class CryptoTradeController extends Controller
             'DASH' => 'DASH_USDT',
             'ETC' => 'ETC_USDT',
             'BCH' => 'BCH_USDT',
+            'BTS' => 'BTS_USDT',
         ];
 
         $normalized = $aliases[$normalized] ?? $normalized;
