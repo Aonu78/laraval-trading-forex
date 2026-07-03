@@ -301,7 +301,7 @@
 
                         <div class="d-flex justify-content-between align-items-center text-muted small">
                             <div>{{ __('Balance') }}: <span id="orderBalance">{{ Config::formatter(auth()->user()->balance) }}</span></div>
-                            <div>{{ __('handling fee') }}: 0% ({{ __('INR') }})</div>
+                            <div>{{ __('handling fee') }}: ({{ Config::formatter(0) }})</div>
                         </div>
 
                         <div class="row mt-3">
